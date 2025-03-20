@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:univote/pages/homepage.dart';
+import 'package:univote/pages/admin/adminhome.dart';
 import 'package:univote/pages/loginpage.dart';
 
 class AuthGate extends StatelessWidget {
@@ -8,20 +8,18 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(stream: Supabase.instance.client.auth.onAuthStateChange, builder: (context, snapshot) {
-      
-      if(snapshot.connectionState==ConnectionState.waiting){
-        return Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
-      final session=snapshot.hasData?snapshot.data!.session:null;
-      if(session!=null){
-        return Homepage();
-      }
-      return Loginpage();
-    },);
+    return StreamBuilder(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final session = snapshot.hasData ? snapshot.data!.session : null;
+        if (session != null) {
+          return AdminHome();
+        }
+        return Loginpage();
+      },
+    );
   }
 }

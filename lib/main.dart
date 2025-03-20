@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authgateway.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: "https://zpnuuitlfymfcljtzzyw.supabase.co",
     anonKey:
