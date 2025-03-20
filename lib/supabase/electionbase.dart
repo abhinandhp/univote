@@ -10,8 +10,10 @@ class ElectionBase {
     } catch (e) {
       print("error");
       print(e);
+      
     }
   }
+  
 
   final stream = Supabase.instance.client
       .from('elections')

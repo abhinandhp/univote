@@ -1,6 +1,6 @@
 class Election {
   int? id;
-  String? name;
+  String name;
   DateTime? start;
   DateTime? end;
   int noOfCandidates;
@@ -17,7 +17,7 @@ class Election {
 
   factory Election.fromMap(Map<String, dynamic> map) {
     return Election(
-      id: map['id'],
+      id: map['id'] as int?,
       name: map['name'],
       candidates: map['candidates'],
       start: DateTime.parse(map['start']),

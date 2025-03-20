@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/models/model.dart';
 import 'package:univote/supabase/electionbase.dart';
 import 'package:intl/intl.dart';
 
+final supabase = Supabase.instance.client;
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -12,12 +14,12 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  final electionbase=ElectionBase();
-  final _electionNameController=TextEditingController();
+  final electionbase = ElectionBase();
+  final _electionNameController = TextEditingController();
   DateTime? _startDateTime;
   DateTime? _endDateTime;
 
-  void _showElectionDialog() async{
+  void _showElectionDialog() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -85,7 +87,11 @@ class _AdminHomeState extends State<AdminHome> {
                   );
                   return;
                 }
-                final newElection=Election(name: _electionNameController.text, start: _startDateTime, end: _endDateTime);
+                final newElection = Election(
+                  name: _electionNameController.text,
+                  start: _startDateTime,
+                  end: _endDateTime,
+                );
                 electionbase.createElection(newElection);
                 // Handle election submission
                 print("Election Name: ${_electionNameController.text}");
@@ -123,13 +129,20 @@ class _AdminHomeState extends State<AdminHome> {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
+  final _stream = supabase.from('elections').stream(primaryKey: ['id']);
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Admin Dashboard"),
+            Text(
+              "Admin Dashboard",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 20),
             SizedBox(
               width: MediaQuery.of(context).size.width,
@@ -141,20 +154,26 @@ class _AdminHomeState extends State<AdminHome> {
                       onTap: _showElectionDialog,
                       child: Container(
                         height: 100,
-                        width: 160,
-                        margin: EdgeInsets.all(12),
+                        width: 150,
+                        margin: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          color: Colors.blueAccent,
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color.fromARGB(255, 170, 207, 237),
+                              Colors.blueAccent,
+                            ],
+                          ),
                         ),
-                        child: Text("Create Election"),
+                        child: Center(child: Text("Create Election")),
                       ),
                     ),
                     SizedBox(width: 10),
                     Container(
                       height: 100,
                       width: 160,
-                      margin: EdgeInsets.all(12),
+                      margin: EdgeInsets.all(10),
+
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.blueAccent,
@@ -163,6 +182,35 @@ class _AdminHomeState extends State<AdminHome> {
                   ],
                 ),
               ),
+            ),
+            SizedBox(height: 30),
+            Text(
+              "All Elections",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            StreamBuilder(
+              stream: _stream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  print(snapshot.error);
+                  return Text(snapshot.error.toString());
+                }
+                final elections = snapshot.data;
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: elections!.length,
+                    itemBuilder: (context, index) {
+                      final elec = elections[index];
+                      print(elec['name']);
+                      return ListTile(title: Text(elec['name']));
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),
