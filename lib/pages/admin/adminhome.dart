@@ -80,7 +80,6 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             ElevatedButton(
               onPressed: () {
-                print("debugggg");
                 if (_electionNameController.text.isEmpty ||
                     _startDateTime == null ||
                     _endDateTime == null) {
@@ -95,10 +94,10 @@ class _AdminHomeState extends State<AdminHome> {
                   end: _endDateTime,
                 );
                 electionbase.createElection(newElection);
-                // Handle election submission
-                print("Election Name: ${_electionNameController.text}");
-                print("Start DateTime: $_startDateTime");
-                print("End DateTime: $_endDateTime");
+                // // Handle election submission
+                // print("Election Name: ${_electionNameController.text}");
+                // print("Start DateTime: $_startDateTime");
+                // print("End DateTime: $_endDateTime");
 
                 Navigator.pop(context); // Close Dialog
               },
@@ -209,7 +208,6 @@ class _AdminHomeState extends State<AdminHome> {
                   return Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  print(snapshot.error);
                   return Text(snapshot.error.toString());
                 }
                 final elections = snapshot.data;
@@ -218,7 +216,6 @@ class _AdminHomeState extends State<AdminHome> {
                     itemCount: elections!.length,
                     itemBuilder: (context, index) {
                       final elec = elections[index];
-                      print(elec['name']);
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: GestureDetector(
