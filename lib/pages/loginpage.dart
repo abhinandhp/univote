@@ -74,8 +74,6 @@
 //   }
 // }
 
-
-
 import 'package:flutter/material.dart';
 import 'package:univote/auth/authservice.dart';
 import 'package:univote/pages/regpage.dart';
@@ -106,8 +104,9 @@ class _LoginPageState extends State<LoginPage> {
       await _auth.signIn(email, password);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
@@ -118,50 +117,50 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(25.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // logo
-            const Icon(
-              Icons.lock_open,
-              size: 120,
-            ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 150),
+              // logo
+              const Icon(Icons.lock_open, size: 120),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 50.0),
-              child: Text("T E X T   B A S E D   S O C I A L   A P P"),
-            ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 50.0),
+                child: Text("U N I V O T E   E L E C T I O N   A P P"),
+              ),
 
-            // email textfield
-            TextField(
-              controller: emailTextController,
-              decoration: const InputDecoration(labelText: "Email"),
-            ),
+              // email textfield
+              TextField(
+                controller: emailTextController,
+                decoration: const InputDecoration(labelText: "Email"),
+              ),
 
-            // password textfield
-            TextField(
-              controller: passwordTextController,
-              decoration: const InputDecoration(labelText: "Password"),
-              obscureText: true,
-            ),
+              // password textfield
+              TextField(
+                controller: passwordTextController,
+                decoration: const InputDecoration(labelText: "Password"),
+                obscureText: true,
+              ),
 
-            const SizedBox(height: 50),
+              const SizedBox(height: 50),
 
-            // login button
-            MaterialButton(
-              onPressed: login,
-              child: const Text("LOGIN"),
-            ),
+              // login button
+              MaterialButton(onPressed: login, child: const Text("LOGIN")),
 
-            // go to register page
-            TextButton(
-              onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const RegisterPage())),
-              child: const Text("SIGN UP"),
-            ),
-          ],
+              // go to register page
+              TextButton(
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterPage(),
+                      ),
+                    ),
+                child: const Text("SIGN UP"),
+              ),
+            ],
+          ),
         ),
       ),
     );
