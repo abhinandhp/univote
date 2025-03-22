@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authgateway.dart';
+import 'package:univote/pages/admin/adminDash.dart';
+import 'package:univote/pages/admin/adminhome.dart';
+import 'package:univote/pages/homepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +21,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: AuthGate());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: AdminHome());
   }
 }
