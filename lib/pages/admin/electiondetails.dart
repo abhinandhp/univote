@@ -52,151 +52,155 @@ class _AdminElectionDetailsState extends State<AdminElectionDetails> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade900,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    elec['name'],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'B22 Computer Science',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  SizedBox(height: 4),
-                  Text(timeres, style: TextStyle(color: Colors.white70)),
-                ],
-              ),
-            ),
-            SizedBox(height: 12),
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade900,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Election Timeline',
+                      elec['name'],
                       style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
+                    Text(
+                      'B22 Computer Science',
+                      style: TextStyle(color: Colors.white70),
+                    ),
                     SizedBox(height: 4),
-                    Text('• Registration: Feb 20 - Feb 25, 2025'),
-                    Text('• Voting: Feb 26 - Mar 2, 2025'),
+                    Text(timeres, style: TextStyle(color: Colors.white70)),
                   ],
                 ),
               ),
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Candidates',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 8),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await client.from('candidates').insert({
-                    'name': "newunni",
-                    'rollno': "B220097EC",
-                    'electionId': 1,
-                  });
-                } catch (e) {
-                  print(e);
-                }
-              },
-              child: Text("add"),
-            ),
-            Expanded(
-              child: StreamBuilder(
-                stream:
-                    _stream, //Supabase.instance.client.from('candidates').select(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData) {
-                    return Center(child: Text("Nothing to display"));
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
-                  }
-                  final cands = snapshot.data as List<dynamic>;
-                  return ListView.builder(
-                    itemCount: cands.length,
-                    itemBuilder: (context, index) {
-                      final candidate = cands[index];
-                      bool stat = candidate['approved'];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.grey.shade300,
-                            child: Text(
-                              candidate['name']![0].toString().toUpperCase(),
-                            ),
-                          ),
-                          title: Text(candidate['name']!),
-                          subtitle: Text(candidate['rollno']),
-                          trailing:
-                              stat
-                                  ? Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.green,
-                                    size: 30,
-                                  )
-                                  : TextButton(
-                                    onPressed: () {
-                                      approve(candidate['id']);
-                                    },
-                                    child: Text(
-                                      'Approve',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
+              SizedBox(height: 12),
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Election Timeline',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                      ),
+                      SizedBox(height: 4),
+                      Text('• Registration: Feb 20 - Feb 25, 2025'),
+                      Text('• Voting: Feb 26 - Mar 2, 2025'),
+                    ],
                   ),
                 ),
-                onPressed: () {},
-                child: Text(
-                  'CAST YOUR VOTE',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Candidates',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 8),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    await client.from('candidates').insert({
+                      'name': "newunni",
+                      'rollno': "B220097EC",
+                      'electionId': 1,
+                    });
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                child: Text("add"),
+              ),
+              SizedBox(
+                height: 800,
+                child: StreamBuilder(
+                  stream:
+                      _stream, //Supabase.instance.client.from('candidates').select(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData) {
+                      return Center(child: Text("Nothing to display"));
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    }
+                    final cands = snapshot.data as List<dynamic>;
+                    return ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: cands.length,
+                      itemBuilder: (context, index) {
+                        final candidate = cands[index];
+                        bool stat = candidate['approved'];
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.grey.shade300,
+                              child: Text(
+                                candidate['name']![0].toString().toUpperCase(),
+                              ),
+                            ),
+                            title: Text(candidate['name']!),
+                            subtitle: Text(candidate['rollno']),
+                            trailing:
+                                stat
+                                    ? Icon(
+                                      Icons.check_circle_outline,
+                                      color: Colors.green,
+                                      size: 30,
+                                    )
+                                    : TextButton(
+                                      onPressed: () {
+                                        approve(candidate['id']);
+                                      },
+                                      child: Text(
+                                        'Approve',
+                                        style: TextStyle(color: Colors.blue),
+                                      ),
+                                    ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    'CAST YOUR VOTE',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

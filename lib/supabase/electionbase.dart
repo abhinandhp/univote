@@ -8,7 +8,6 @@ class ElectionBase {
     try {
       await database.insert(elec.toMap());
     } catch (e) {
-      print("error");
       print(e);
     }
   }

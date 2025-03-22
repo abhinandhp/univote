@@ -98,7 +98,6 @@ class _LoginPageState extends State<LoginPage> {
     // prepare data
     String email = emailTextController.text;
     String password = passwordTextController.text;
-
     // attempt login..
     try {
       await _auth.signIn(email, password);
