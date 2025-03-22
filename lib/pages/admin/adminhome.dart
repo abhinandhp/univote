@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/models/model.dart';
+import 'package:univote/pages/admin/electiondetails.dart';
 import 'package:univote/supabase/electionbase.dart';
 import 'package:intl/intl.dart';
-import 'package:univote/supabase/realdbservice.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -131,14 +131,7 @@ class _AdminHomeState extends State<AdminHome> {
   }
 
   final _stream = supabase.from('elections').stream(primaryKey: ['id']);
-  late RealDBService _rdbService;
-
-  @override
-  void initState() {
-    _rdbService = RealDBService();
-    super.initState();
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -215,11 +208,15 @@ class _AdminHomeState extends State<AdminHome> {
                       print(elec['name']);
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
-                        child: ListTile(
-                          title: Text(elec['name']),
-                          leading: FloatingActionButton(
-                            onPressed: () {},
-                            child: Icon(Icons.add),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                              return AdminElectionDetails(elec: elec,);
+                            },));
+                          },
+                          child: ListTile(
+                            title: Text(elec['name']),
+                            
                           ),
                         ),
                       );

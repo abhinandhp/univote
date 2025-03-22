@@ -36,3 +36,38 @@ class Election {
     };
   }
 }
+
+
+class Candidate {
+  final int? id;
+  final int electionId;
+  final String name;
+  String rollno;
+
+  Candidate({
+    this.id,
+    required this.electionId,
+    required this.name,
+    required this.rollno
+  });
+
+  // Convert Candidate object to Map (for Supabase)
+  Map<String, dynamic> toMap() {
+    return {
+      'election_id': electionId,
+      'name': name,
+      'rollno': rollno
+    };
+  }
+
+  // Convert Map from Supabase to Candidate object
+  factory Candidate.fromMap(Map<String, dynamic> map) {
+    return Candidate(
+      id: map['id'],
+      electionId: map['election_id'],
+      name: map['name'],
+      rollno: map['rollno'],
+      
+    );
+  }
+}

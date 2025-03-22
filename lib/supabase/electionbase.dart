@@ -6,21 +6,22 @@ class ElectionBase {
 
   Future createElection(Election elec) async {
     try {
-    await database.insert(elec.toMap());
+      await database.insert(elec.toMap());
     } catch (e) {
       print("error");
       print(e);
-      
     }
   }
-  
 
   final stream = Supabase.instance.client
       .from('elections')
       .stream(primaryKey: ['id'])
       .map((data) => data.map((elecMap) => Election.fromMap(elecMap)).toList());
 
-  Future updateElection(Election oldElec, Map<String, dynamic> updatedFields) async {
+  Future updateElection(
+    Election oldElec,
+    Map<String, dynamic> updatedFields,
+  ) async {
     await database.update(updatedFields).eq('id', oldElec.id!);
   }
 
