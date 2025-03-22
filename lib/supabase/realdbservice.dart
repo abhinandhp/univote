@@ -17,7 +17,6 @@ class RealDBService {
         client.realtime.getChannels().forEach((channel) async {
           await client.realtime.removeChannel(channel);
         });
-        client.realtime.channel('elections').subscribe();
       });
   }
 }
