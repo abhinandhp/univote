@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:univote/auth/authservice.dart';
 import 'package:univote/models/model.dart';
 import 'package:univote/pages/admin/electiondetails.dart';
 import 'package:univote/supabase/electionbase.dart';
@@ -131,6 +132,17 @@ class _AdminHomeState extends State<AdminHome> {
   }
 
   final _stream = supabase.from('elections').stream(primaryKey: ['id']);
+
+
+  final AuthService authService=AuthService();
+  void logout() async{
+    try {
+    await authService.signOut();
+
+    } catch (e) {
+      print(e);
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -178,6 +190,7 @@ class _AdminHomeState extends State<AdminHome> {
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.blueAccent,
                       ),
+                      child: TextButton(onPressed: logout, child: Text("Logout")),
                     ),
                   ],
                 ),
