@@ -44,20 +44,6 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class Election {
-  final String id;
-  final String title;
-  final String endsIn;
-  final int candidatesCount;
-
-  Election({
-    required this.id,
-    required this.title,
-    required this.endsIn,
-    required this.candidatesCount,
-  });
-}
-
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final AuthService authService = AuthService();
