@@ -66,6 +66,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -371,6 +372,7 @@ class _HomePageState extends State<HomePage> {
             fontWeight:
                 _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
           ),
+
         ),
       ),
     );

@@ -1,79 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_login/flutter_login.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:univote/auth/authservice.dart';
-// import 'package:univote/pages/admin/adminhome.dart';
-// import 'package:univote/pages/homepage.dart';
-
-// class Loginpage extends StatefulWidget {
-//   const Loginpage({super.key});
-
-//   @override
-//   State<Loginpage> createState() => _LoginpageState();
-// }
-
-// class _LoginpageState extends State<Loginpage> {
-//   final AuthService authService = AuthService();
-//   final SupabaseClient supabase = Supabase.instance.client;
-//   bool isAdmin = false;
-//   Future<String?> onLogin(LoginData data) async {
-//     try {
-//       final response = await authService.signIn(data.name, data.password);
-//       if (response.user == null) throw Exception("Login failed");
-
-//       // Check Admin Status
-//       final adminCheck =
-//           await supabase
-//               .from('profiles')
-//               .select('is_admin')
-//               .eq('id', response.user!.id)
-//               .single();
-
-//       isAdmin = adminCheck['is_admin'] ?? false;
-//       return null;
-//     } catch (e) {
-//       print(e);
-//     }
-//     return 'User not exists';
-//   }
-
-//   Future<String?> onRecoverPassword(String name) async {
-//     await Future.delayed(Durations.medium1);
-//     return null;
-//   }
-
-//   Future<String?> onSignUp(SignupData data) async {
-//     await authService.signUp(data.name!, data.password!);
-//     return null;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: FlutterLogin(
-//         onLogin: onLogin,
-//         onRecoverPassword: onRecoverPassword,
-//         onSignup: onSignUp,
-//         onSubmitAnimationCompleted: () {
-//           print("ahahahahahhahahha------------------------##########################a@");
-//           if (context.mounted) {
-//             print(isAdmin);
-//             if (isAdmin) {
-//               Navigator.of(context).pushReplacement(
-//                 MaterialPageRoute(builder: (context) => AdminHome()),
-//               );
-//             } else {
-//               Navigator.of(context).pushReplacement(
-//                 MaterialPageRoute(builder: (context) => Homepage()),
-//               );
-//             }
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:univote/auth/authservice.dart';
 import 'package:univote/pages/regpage.dart';
@@ -105,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ).showSnackBar(SnackBar(content: Text("Invalid username or password")));
       }
     }
   }
@@ -114,51 +38,148 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(25.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 150),
-              // logo
-              const Icon(Icons.lock_open, size: 120),
+      backgroundColor: Colors.blueAccent,
+      body: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          margin: EdgeInsets.symmetric(horizontal: 100, vertical: 100),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 50.0),
-                child: Text("U N I V O T E   E L E C T I O N   A P P"),
-              ),
-
-              // email textfield
-              TextField(
-                controller: emailTextController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-
-              // password textfield
-              TextField(
-                controller: passwordTextController,
-                decoration: const InputDecoration(labelText: "Password"),
-                obscureText: true,
-              ),
-
-              const SizedBox(height: 50),
-
-              // login button
-              MaterialButton(onPressed: login, child: const Text("LOGIN")),
-
-              // go to register page
-              TextButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegisterPage(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // ** Logo (Circular UV) **
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue, // Circle background color
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'UV',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                child: const Text("SIGN UP"),
-              ),
-            ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // ** Title: UNIVOTE **
+                const Text(
+                  'UNIVOTE',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+
+                // ** Subtitle: NIT Calicut Election System **
+                const Text(
+                  'NIT Calicut Election System',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+
+                // ** Student ID/Email Input **
+                SizedBox(
+                  width: 300,
+                  height: 50,
+                  child: TextField(
+                    controller: emailTextController,
+                    decoration: InputDecoration(
+                      hintText: 'Student ID / Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // ** Password Input **
+                SizedBox(
+                  width: 300,
+                  height: 50,
+                  child: TextField(
+                    controller: passwordTextController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ** Login Button **
+                SizedBox(
+                  width: 300,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue, // Dark blue button
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: login,
+                    child: const Text(
+                      'LOG IN',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // // ** Forgot Password & Register Links **
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RegisterPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // ** Footer Text **
+                const Text(
+                  '© 2025 NIT Calicut',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
           ),
         ),
       ),
