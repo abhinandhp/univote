@@ -357,7 +357,7 @@ class _AdminHomeState extends State<AdminHome> {
       title: Text(
         dateTime == null
             ? label
-            : "${DateFormat('yyyy-MM-dd HH:mm').format(dateTime)}",
+            : DateFormat('yyyy-MM-dd HH:mm').format(dateTime),
       ),
       trailing: Icon(Icons.calendar_today),
       onTap: () async {
@@ -491,8 +491,8 @@ class _AdminHomeState extends State<AdminHome> {
               const Text(
                 'Active Elections',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
                   color: Colors.blue,
                 ),
               ),
@@ -505,7 +505,7 @@ class _AdminHomeState extends State<AdminHome> {
                     return Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
+                    return Center(child: Text("Error: \${snapshot.error}"));
                   }
 
                   final elections = snapshot.data;
@@ -518,40 +518,34 @@ class _AdminHomeState extends State<AdminHome> {
                     );
                   }
 
+                  final now = DateTime.now();
+                  final activeElections =
+                      elections
+                          .where(
+                            (elec) =>
+                                DateTime.parse(elec['start']).isBefore(now) &&
+                                DateTime.parse(elec['end']).isAfter(now),
+                          )
+                          .toList();
+
+                  if (activeElections.isEmpty) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: Text('No active elections')),
+                      ),
+                    );
+                  }
+
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: elections.length,
+                    itemCount: activeElections.length,
                     itemBuilder: (context, index) {
-                      final elec = elections[index];
-                      final now = DateTime.now();
-                      final bool isActive =
-                          DateTime.parse(elec['start']).isBefore(now) &&
-                          DateTime.parse(elec['end']).isAfter(now);
-                      final bool isUpcoming = DateTime.parse(
-                        elec['start'],
-                      ).isAfter(now);
-
-                      Color borderColor = Colors.grey;
-                      if (isActive) borderColor = Colors.blue;
-                      if (isUpcoming) borderColor = Colors.orange;
-
-                      String status = 'Ended';
-                      if (isActive) status = 'Active';
-                      if (isUpcoming) status = 'Upcoming';
-
-                      Duration timeLeft = Duration.zero;
-                      String timeLeftText = '';
-
-                      if (isActive) {
-                        timeLeft = DateTime.parse(elec['end']).difference(now);
-                        timeLeftText = 'Ends in: ';
-                      } else if (isUpcoming) {
-                        timeLeft = DateTime.parse(
-                          elec['start'],
-                        ).difference(now);
-                        timeLeftText = 'Starts in: ';
-                      }
+                      final elec = activeElections[index];
+                      final timeLeft = DateTime.parse(
+                        elec['end'],
+                      ).difference(now);
 
                       String formatDuration(Duration duration) {
                         if (duration.inDays > 0) {
@@ -567,7 +561,7 @@ class _AdminHomeState extends State<AdminHome> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: borderColor, width: 2),
+                          side: BorderSide(color: Colors.blue, width: 2),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -579,57 +573,37 @@ class _AdminHomeState extends State<AdminHome> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '${elec['name']} - ${elec['department'] ?? 'N/A'}',
+                                    elec['name'],
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Chip(
-                                    label: Text(status),
-                                    backgroundColor:
-                                        isActive
-                                            ? Colors.blue.shade100
-                                            : isUpcoming
-                                            ? Colors.orange.shade100
-                                            : Colors.grey.shade100,
+                                    label: Text('Active'),
+                                    backgroundColor: Colors.blue.shade100,
                                     labelStyle: TextStyle(
-                                      color:
-                                          isActive
-                                              ? Colors.blue.shade900
-                                              : isUpcoming
-                                              ? Colors.orange.shade900
-                                              : Colors.grey.shade900,
+                                      color: Colors.blue.shade900,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              if (isActive || isUpcoming)
-                                Text(
-                                  '$timeLeftText${formatDuration(timeLeft)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isActive ? Colors.blue : Colors.orange,
-                                  ),
-                                )
-                              else
-                                Text(
-                                  'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 2),
                               Text(
-                                'Candidates: ${elec['candidates'] ?? 'N/A'}',
+                                'Ends in: ${formatDuration(timeLeft)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: Colors.blue,
+                                ),
                               ),
+
                               const SizedBox(height: 12),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   OutlinedButton.icon(
                                     onPressed: () {
-                                      // View election details
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -652,39 +626,16 @@ class _AdminHomeState extends State<AdminHome> {
                                     label: const Text('Edit'),
                                   ),
                                   const SizedBox(width: 8),
-                                  if (isActive)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View live results
-                                      },
-                                      icon: const Icon(Icons.poll),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue.shade900,
-                                      ),
-                                    )
-                                  else if (!isUpcoming)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View final results
-                                      },
-                                      icon: const Icon(Icons.bar_chart),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade800,
-                                      ),
-                                    )
-                                  else
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // Manage candidates
-                                      },
-                                      icon: const Icon(Icons.person_add),
-                                      label: const Text('Candidates'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange.shade800,
-                                      ),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      // View live results
+                                    },
+                                    icon: const Icon(Icons.poll),
+                                    label: const Text('Results'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue.shade900,
                                     ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -699,9 +650,9 @@ class _AdminHomeState extends State<AdminHome> {
               const Text(
                 'Upcoming Elections',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.blue,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.orange,
                 ),
               ),
               SizedBox(height: 10),
@@ -712,7 +663,7 @@ class _AdminHomeState extends State<AdminHome> {
                     return Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
+                    return Center(child: Text("Error: \${snapshot.error}"));
                   }
 
                   final elections = snapshot.data;
@@ -720,7 +671,25 @@ class _AdminHomeState extends State<AdminHome> {
                     return const Card(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Center(child: Text('No active elections')),
+                        child: Center(child: Text('No upcoming elections')),
+                      ),
+                    );
+                  }
+
+                  final now = DateTime.now();
+                  final upcomingElections =
+                      elections
+                          .where(
+                            (elec) =>
+                                DateTime.parse(elec['start']).isAfter(now),
+                          )
+                          .toList();
+
+                  if (upcomingElections.isEmpty) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: Text('No upcoming elections')),
                       ),
                     );
                   }
@@ -728,37 +697,12 @@ class _AdminHomeState extends State<AdminHome> {
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: elections.length,
+                    itemCount: upcomingElections.length,
                     itemBuilder: (context, index) {
-                      final elec = elections[index];
-                      final now = DateTime.now();
-                      final bool isActive =
-                          DateTime.parse(elec['start']).isBefore(now) &&
-                          DateTime.parse(elec['end']).isAfter(now);
-                      final bool isUpcoming = DateTime.parse(
+                      final elec = upcomingElections[index];
+                      final timeLeft = DateTime.parse(
                         elec['start'],
-                      ).isAfter(now);
-
-                      Color borderColor = Colors.grey;
-                      if (isActive) borderColor = Colors.blue;
-                      if (isUpcoming) borderColor = Colors.orange;
-
-                      String status = 'Ended';
-                      if (isActive) status = 'Active';
-                      if (isUpcoming) status = 'Upcoming';
-
-                      Duration timeLeft = Duration.zero;
-                      String timeLeftText = '';
-
-                      if (isActive) {
-                        timeLeft = DateTime.parse(elec['end']).difference(now);
-                        timeLeftText = 'Ends in: ';
-                      } else if (isUpcoming) {
-                        timeLeft = DateTime.parse(
-                          elec['start'],
-                        ).difference(now);
-                        timeLeftText = 'Starts in: ';
-                      }
+                      ).difference(now);
 
                       String formatDuration(Duration duration) {
                         if (duration.inDays > 0) {
@@ -774,7 +718,7 @@ class _AdminHomeState extends State<AdminHome> {
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: borderColor, width: 2),
+                          side: BorderSide(color: Colors.orange, width: 2),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -786,57 +730,37 @@ class _AdminHomeState extends State<AdminHome> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '${elec['name']} - ${elec['department'] ?? 'N/A'}',
+                                    elec['name'],
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Chip(
-                                    label: Text(status),
-                                    backgroundColor:
-                                        isActive
-                                            ? Colors.blue.shade100
-                                            : isUpcoming
-                                            ? Colors.orange.shade100
-                                            : Colors.grey.shade100,
+                                    label: Text('Upcoming'),
+                                    backgroundColor: Colors.orange.shade100,
                                     labelStyle: TextStyle(
-                                      color:
-                                          isActive
-                                              ? Colors.blue.shade900
-                                              : isUpcoming
-                                              ? Colors.orange.shade900
-                                              : Colors.grey.shade900,
+                                      color: Colors.orange.shade900,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              if (isActive || isUpcoming)
-                                Text(
-                                  '$timeLeftText${formatDuration(timeLeft)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isActive ? Colors.blue : Colors.orange,
-                                  ),
-                                )
-                              else
-                                Text(
-                                  'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 2),
                               Text(
-                                'Candidates: ${elec['candidates'] ?? 'N/A'}',
+                                'Starts in: ${formatDuration(timeLeft)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
+                                  color: Colors.orange,
+                                ),
                               ),
+
                               const SizedBox(height: 12),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   OutlinedButton.icon(
                                     onPressed: () {
-                                      // View election details
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -858,40 +782,6 @@ class _AdminHomeState extends State<AdminHome> {
                                     icon: const Icon(Icons.edit),
                                     label: const Text('Edit'),
                                   ),
-                                  const SizedBox(width: 8),
-                                  if (isActive)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View live results
-                                      },
-                                      icon: const Icon(Icons.poll),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue.shade900,
-                                      ),
-                                    )
-                                  else if (!isUpcoming)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View final results
-                                      },
-                                      icon: const Icon(Icons.bar_chart),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade800,
-                                      ),
-                                    )
-                                  else
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // Manage candidates
-                                      },
-                                      icon: const Icon(Icons.person_add),
-                                      label: const Text('Candidates'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange.shade800,
-                                      ),
-                                    ),
                                 ],
                               ),
                             ],
@@ -904,12 +794,12 @@ class _AdminHomeState extends State<AdminHome> {
               ),
 
               SizedBox(height: 20),
-              const Text(
+              Text(
                 'Past Elections',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.blue,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey.shade700,
                 ),
               ),
               SizedBox(height: 10),
@@ -921,7 +811,7 @@ class _AdminHomeState extends State<AdminHome> {
                     return Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
+                    return Center(child: Text("Error: \${snapshot.error}"));
                   }
 
                   final elections = snapshot.data;
@@ -929,7 +819,24 @@ class _AdminHomeState extends State<AdminHome> {
                     return const Card(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Center(child: Text('No active elections')),
+                        child: Center(child: Text('No past elections')),
+                      ),
+                    );
+                  }
+
+                  final now = DateTime.now();
+                  final pastElections =
+                      elections
+                          .where(
+                            (elec) => DateTime.parse(elec['end']).isBefore(now),
+                          )
+                          .toList();
+
+                  if (pastElections.isEmpty) {
+                    return const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: Text('No past elections')),
                       ),
                     );
                   }
@@ -937,53 +844,15 @@ class _AdminHomeState extends State<AdminHome> {
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: elections.length,
+                    itemCount: pastElections.length,
                     itemBuilder: (context, index) {
-                      final elec = elections[index];
-                      final now = DateTime.now();
-                      final bool isActive =
-                          DateTime.parse(elec['start']).isBefore(now) &&
-                          DateTime.parse(elec['end']).isAfter(now);
-                      final bool isUpcoming = DateTime.parse(
-                        elec['start'],
-                      ).isAfter(now);
-
-                      Color borderColor = Colors.grey;
-                      if (isActive) borderColor = Colors.blue;
-                      if (isUpcoming) borderColor = Colors.orange;
-
-                      String status = 'Ended';
-                      if (isActive) status = 'Active';
-                      if (isUpcoming) status = 'Upcoming';
-
-                      Duration timeLeft = Duration.zero;
-                      String timeLeftText = '';
-
-                      if (isActive) {
-                        timeLeft = DateTime.parse(elec['end']).difference(now);
-                        timeLeftText = 'Ends in: ';
-                      } else if (isUpcoming) {
-                        timeLeft = DateTime.parse(
-                          elec['start'],
-                        ).difference(now);
-                        timeLeftText = 'Starts in: ';
-                      }
-
-                      String formatDuration(Duration duration) {
-                        if (duration.inDays > 0) {
-                          return '${duration.inDays} days ${duration.inHours % 24} hours';
-                        } else if (duration.inHours > 0) {
-                          return '${duration.inHours} hours ${duration.inMinutes % 60} minutes';
-                        } else {
-                          return '${duration.inMinutes} minutes';
-                        }
-                      }
+                      final elec = pastElections[index];
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: borderColor, width: 2),
+                          side: BorderSide(color: Colors.grey, width: 2),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -995,57 +864,37 @@ class _AdminHomeState extends State<AdminHome> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '${elec['name']} - ${elec['department'] ?? 'N/A'}',
+                                    elec['name'],
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Chip(
-                                    label: Text(status),
-                                    backgroundColor:
-                                        isActive
-                                            ? Colors.blue.shade100
-                                            : isUpcoming
-                                            ? Colors.orange.shade100
-                                            : Colors.grey.shade100,
+                                    label: Text('Ended'),
+                                    backgroundColor: Colors.grey.shade100,
                                     labelStyle: TextStyle(
-                                      color:
-                                          isActive
-                                              ? Colors.blue.shade900
-                                              : isUpcoming
-                                              ? Colors.orange.shade900
-                                              : Colors.grey.shade900,
+                                      color: Colors.grey.shade900,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              if (isActive || isUpcoming)
-                                Text(
-                                  '$timeLeftText${formatDuration(timeLeft)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isActive ? Colors.blue : Colors.orange,
-                                  ),
-                                )
-                              else
-                                Text(
-                                  'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 2),
                               Text(
-                                'Candidates: ${elec['candidates'] ?? 'N/A'}',
+                                'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+
                               const SizedBox(height: 12),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   OutlinedButton.icon(
                                     onPressed: () {
-                                      // View election details
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -1060,47 +909,16 @@ class _AdminHomeState extends State<AdminHome> {
                                     label: const Text('View'),
                                   ),
                                   const SizedBox(width: 8),
-                                  OutlinedButton.icon(
+                                  ElevatedButton.icon(
                                     onPressed: () {
-                                      // Edit election
+                                      // View final results
                                     },
-                                    icon: const Icon(Icons.edit),
-                                    label: const Text('Edit'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  if (isActive)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View live results
-                                      },
-                                      icon: const Icon(Icons.poll),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue.shade900,
-                                      ),
-                                    )
-                                  else if (!isUpcoming)
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // View final results
-                                      },
-                                      icon: const Icon(Icons.bar_chart),
-                                      label: const Text('Results'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade800,
-                                      ),
-                                    )
-                                  else
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        // Manage candidates
-                                      },
-                                      icon: const Icon(Icons.person_add),
-                                      label: const Text('Candidates'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange.shade800,
-                                      ),
+                                    icon: const Icon(Icons.bar_chart),
+                                    label: const Text('Results'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green.shade800,
                                     ),
+                                  ),
                                 ],
                               ),
                             ],
