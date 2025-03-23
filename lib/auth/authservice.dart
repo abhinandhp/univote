@@ -12,7 +12,7 @@ class AuthService {
   }
 
   //signup
-  Future<void> signUp(String email, String pass) async {
+  Future<void> signUp(String email, String pass,String name) async {
     // return await _supabase.auth.signUp(
     //   password: pass,
     //   email: email,
@@ -29,7 +29,7 @@ class AuthService {
         await _supabase.from('profiles').insert({
           'id': response.user!.id,
           'email': email,
-          'username': "name",
+          'username': name,
           'is_admin': false, // Default as regular user
         });
       }
