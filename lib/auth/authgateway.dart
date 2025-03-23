@@ -78,7 +78,7 @@ class AuthGate extends StatelessWidget {
 
             final isAdmin = adminSnapshot.data ?? false;
 
-            return isAdmin ? AdminHome() : Homepage();
+            return isAdmin ? AdminHome() : HomePage();
           },
         );
       },

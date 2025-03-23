@@ -13,7 +13,6 @@ class RealDBService {
       ..map(
         (data) => data.map((elecMap) => Election.fromMap(elecMap)).toList(),
       ).handleError((error) {
-        print("Stream Error: $error");
         client.realtime.getChannels().forEach((channel) async {
           await client.realtime.removeChannel(channel);
         });
