@@ -245,6 +245,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authservice.dart';
 import 'package:univote/models/model.dart';
@@ -262,6 +263,7 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
+
   final electionbase = ElectionBase();
   final _electionNameController = TextEditingController();
   DateTime? _startDateTime;
@@ -502,7 +504,15 @@ class _AdminHomeState extends State<AdminHome> {
                 stream: _stream, // Backend stream for fetching elections
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(),
+                      ),
+                    );
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: \${snapshot.error}"));
@@ -537,112 +547,119 @@ class _AdminHomeState extends State<AdminHome> {
                     );
                   }
 
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: activeElections.length,
-                    itemBuilder: (context, index) {
-                      final elec = activeElections[index];
-                      final timeLeft = DateTime.parse(
-                        elec['end'],
-                      ).difference(now);
+                  return SizedBox(
+                    height: 175,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: activeElections.length,
+                      itemBuilder: (context, index) {
+                        final elec = activeElections[index];
+                        final timeLeft = DateTime.parse(
+                          elec['end'],
+                        ).difference(now);
 
-                      String formatDuration(Duration duration) {
-                        if (duration.inDays > 0) {
-                          return '${duration.inDays} days ${duration.inHours % 24} hours';
-                        } else if (duration.inHours > 0) {
-                          return '${duration.inHours} hours ${duration.inMinutes % 60} minutes';
-                        } else {
-                          return '${duration.inMinutes} minutes';
+                        String formatDuration(Duration duration) {
+                          if (duration.inDays > 0) {
+                            return '${duration.inDays} days ${duration.inHours % 24} hours';
+                          } else if (duration.inHours > 0) {
+                            return '${duration.inHours} hours ${duration.inMinutes % 60} minutes';
+                          } else {
+                            return '${duration.inMinutes} minutes';
+                          }
                         }
-                      }
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.blue, width: 2),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                        return SizedBox(
+                          width: 300,
+                          child: Card(
+                            margin: const EdgeInsets.only(right: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(color: Colors.blue, width: 2),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    elec['name'],
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Chip(
-                                    label: Text('Active'),
-                                    backgroundColor: Colors.blue.shade100,
-                                    labelStyle: TextStyle(
-                                      color: Colors.blue.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Ends in: ${formatDuration(timeLeft)}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                  color: Colors.blue,
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => AdminElectionDetails(
-                                                elec: elec,
-                                              ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        elec['name'],
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.visibility),
-                                    label: const Text('View'),
+                                      ),
+                                      Chip(
+                                        label: Text('Active'),
+                                        backgroundColor: Colors.blue.shade100,
+                                        labelStyle: TextStyle(
+                                          color: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      // Edit election
-                                    },
-                                    icon: const Icon(Icons.edit),
-                                    label: const Text('Edit'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      // View live results
-                                    },
-                                    icon: const Icon(Icons.poll),
-                                    label: const Text('Results'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue.shade900,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Ends in: ${formatDuration(timeLeft)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color: Colors.blue,
                                     ),
+                                  ),
+
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      AdminElectionDetails(
+                                                        elec: elec,
+                                                      ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.visibility),
+                                        label: const Text('View'),
+                                      ),
+                                      // const SizedBox(width: 8),
+                                      // OutlinedButton.icon(
+                                      //   onPressed: () {
+                                      //     // Edit election
+                                      //   },
+                                      //   icon: const Icon(Icons.edit),
+                                      //   label: const Text('Edit'),
+                                      // ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          // View live results
+                                        },
+                                        icon: const Icon(Icons.poll),
+                                        label: const Text('Results'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -660,7 +677,15 @@ class _AdminHomeState extends State<AdminHome> {
                 stream: _stream, // Backend stream for fetching elections
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(),
+                      ),
+                    );
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: \${snapshot.error}"));
@@ -694,101 +719,108 @@ class _AdminHomeState extends State<AdminHome> {
                     );
                   }
 
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: upcomingElections.length,
-                    itemBuilder: (context, index) {
-                      final elec = upcomingElections[index];
-                      final timeLeft = DateTime.parse(
-                        elec['start'],
-                      ).difference(now);
+                  return SizedBox(
+                    height: 175,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: upcomingElections.length,
+                      itemBuilder: (context, index) {
+                        final elec = upcomingElections[index];
+                        final timeLeft = DateTime.parse(
+                          elec['start'],
+                        ).difference(now);
 
-                      String formatDuration(Duration duration) {
-                        if (duration.inDays > 0) {
-                          return '${duration.inDays} days ${duration.inHours % 24} hours';
-                        } else if (duration.inHours > 0) {
-                          return '${duration.inHours} hours ${duration.inMinutes % 60} minutes';
-                        } else {
-                          return '${duration.inMinutes} minutes';
+                        String formatDuration(Duration duration) {
+                          if (duration.inDays > 0) {
+                            return '${duration.inDays} days ${duration.inHours % 24} hours';
+                          } else if (duration.inHours > 0) {
+                            return '${duration.inHours} hours ${duration.inMinutes % 60} minutes';
+                          } else {
+                            return '${duration.inMinutes} minutes';
+                          }
                         }
-                      }
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.orange, width: 2),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                        return SizedBox(
+                          width: 300,
+                          child: Card(
+                            margin: const EdgeInsets.only(right: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(color: Colors.orange, width: 2),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    elec['name'],
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Chip(
-                                    label: Text('Upcoming'),
-                                    backgroundColor: Colors.orange.shade100,
-                                    labelStyle: TextStyle(
-                                      color: Colors.orange.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Starts in: ${formatDuration(timeLeft)}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                  color: Colors.orange,
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => AdminElectionDetails(
-                                                elec: elec,
-                                              ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        elec['name'],
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.visibility),
-                                    label: const Text('View'),
+                                      ),
+                                      Chip(
+                                        label: Text('Upcoming'),
+                                        backgroundColor: Colors.orange.shade100,
+                                        labelStyle: TextStyle(
+                                          color: Colors.orange.shade900,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      // Edit election
-                                    },
-                                    icon: const Icon(Icons.edit),
-                                    label: const Text('Edit'),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Starts in: ${formatDuration(timeLeft)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      AdminElectionDetails(
+                                                        elec: elec,
+                                                      ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.visibility),
+                                        label: const Text('View'),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          // Edit election
+                                        },
+                                        icon: const Icon(Icons.edit),
+                                        label: const Text('Edit'),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -808,7 +840,15 @@ class _AdminHomeState extends State<AdminHome> {
                 stream: _stream, // Backend stream for fetching elections
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(),
+                      ),
+                    );
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text("Error: \${snapshot.error}"));
@@ -841,100 +881,195 @@ class _AdminHomeState extends State<AdminHome> {
                     );
                   }
 
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: pastElections.length,
-                    itemBuilder: (context, index) {
-                      final elec = pastElections[index];
+                  return SizedBox(
+                    height: 175,
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.grey, width: 2),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    elec['name'],
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Chip(
-                                    label: Text('Ended'),
-                                    backgroundColor: Colors.grey.shade100,
-                                    labelStyle: TextStyle(
-                                      color: Colors.grey.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      //physics: const NeverScrollableScrollPhysics(),
+                      itemCount: pastElections.length,
+                      itemBuilder: (context, index) {
+                        final elec = pastElections[index];
 
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                        return SizedBox(
+                          width: 300,
+
+                          child: Card(
+                            margin: const EdgeInsets.only(right: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(color: Colors.grey, width: 2),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => AdminElectionDetails(
-                                                elec: elec,
-                                              ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        elec['name'],
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.visibility),
-                                    label: const Text('View'),
+                                      ),
+                                      Chip(
+                                        label: Text('Ended'),
+                                        backgroundColor: Colors.grey.shade100,
+                                        labelStyle: TextStyle(
+                                          color: Colors.grey.shade900,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      // View final results
-                                    },
-                                    icon: const Icon(Icons.bar_chart),
-                                    label: const Text('Results'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green.shade800,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
                                     ),
+                                  ),
+
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      AdminElectionDetails(
+                                                        elec: elec,
+                                                      ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.visibility),
+                                        label: const Text('View'),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          // View final results
+                                        },
+                                        icon: const Icon(Icons.bar_chart),
+                                        label: const Text('Results'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Colors.green.shade800,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 },
               ),
+              SizedBox(height: 50),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+Widget buildShimmerElectionCard() {
+  return SizedBox(
+    width: 300,
+    child: Shimmer.fromColors(
+      baseColor: const Color.fromARGB(255, 194, 194, 194),
+      highlightColor: const Color.fromARGB(246, 255, 255, 255),
+      child: Card(
+        margin: const EdgeInsets.only(right: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.grey.shade400, width: 2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title & Status Chip Placeholder
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Container(
+                    width: 60,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Time Remaining Placeholder
+              Container(
+                width: 180,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Buttons Placeholder
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 100,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 

@@ -106,11 +106,7 @@ class _AdminElectionDetailsState extends State<AdminElectionDetails> {
                 ),
               ),
               SizedBox(height: 12),
-              Text(
-                'Candidates',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              SizedBox(height: 8),
+
               TextButton(
                 onPressed: () async {
                   try {
@@ -125,6 +121,11 @@ class _AdminElectionDetailsState extends State<AdminElectionDetails> {
                 },
                 child: Text("add"),
               ),
+              Text(
+                'Candidates',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 8),
               SizedBox(
                 height: 800,
                 child: StreamBuilder(
