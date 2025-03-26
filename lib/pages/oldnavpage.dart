@@ -98,7 +98,7 @@ class _BottomNavState extends State<BottomNav> {
           borderRadius: BorderRadius.circular(25),
         ),
         //handleAndroidBackButtonPress: true,
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromARGB(255, 25, 24, 40),
         stateManagement: true,
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/pages/admin/adminhome.dart';
 import 'package:univote/pages/loginpage.dart';
@@ -61,10 +63,9 @@ class _AuthGateState extends State<AuthGate> {
             if (adminSnapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(
                 body: Center(
-                  child: SpinKitThreeBounce(
-                    // Running dots animation
-                    color: Colors.blue, // Change color as needed
-                    size: 30.0,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Lottie.asset('assets/loading.json'),
                   ),
                 ),
               );
@@ -72,14 +73,57 @@ class _AuthGateState extends State<AuthGate> {
 
             if (adminSnapshot.hasError) {
               return Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Error checking admin status"),
-                      SizedBox(height: 20),
-                      TextButton(onPressed: refresh, child: Text("Refresh")),
-                    ],
+                backgroundColor: Colors.white,
+                appBar: AppBar(
+                  title: Text(
+                    'Univote',
+                    style: GoogleFonts.ultra(
+                      //fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue.shade900,
+                  elevation: 0,
+                ),
+                body: SafeArea(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          child: Lottie.asset('assets/no_internet.json'),
+                        ),
+                        SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: refresh,
+                          child: Container(
+                            height: 50,
+                            width: 160,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: const Color.fromARGB(255, 23, 23, 23),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  ' Retry',
+                                  style: GoogleFonts.ultra(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    letterSpacing: 1.5,
+                                    fontWeight: FontWeight.w100,
+                                  ),
+                                ),
+                                Lottie.asset('assets/retry.json'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

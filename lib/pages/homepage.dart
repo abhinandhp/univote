@@ -4,8 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authservice.dart';
-import 'package:univote/models/model.dart';
-import 'package:univote/pages/admin/electiondetails.dart';
+import 'package:univote/pages/userelctiondetails.dart';
 import 'package:univote/supabase/electionbase.dart';
 import 'package:intl/intl.dart';
 
@@ -20,126 +19,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final electionbase = ElectionBase();
-  final _electionNameController = TextEditingController();
-  DateTime? _startDateTime;
-  DateTime? _endDateTime;
+
   final AuthService authService = AuthService();
-  final _stream = supabase.from('elections').stream(primaryKey: ['id']);
+  final _stream = supabase
+      .from('elections')
+      .stream(primaryKey: ['id'])
+      .order('end', ascending: true);
 
-  void _showElectionDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Text(
-            "Create Election",
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _electionNameController,
-                decoration: InputDecoration(
-                  labelText: "Election Name",
-                  hintText: 'e.g., Class Representative',
-                ),
-              ),
-              SizedBox(height: 10),
-              _buildDateTimePicker("Select Start Date & Time", _startDateTime, (
-                dateTime,
-              ) {
-                setState(() => _startDateTime = dateTime);
-              }),
-              _buildDateTimePicker("Select End Date & Time", _endDateTime, (
-                dateTime,
-              ) {
-                if (_startDateTime != null &&
-                    dateTime.isBefore(_startDateTime!)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("End date cannot be before start date"),
-                    ),
-                  );
-                  return;
-                }
-                setState(() => _endDateTime = dateTime);
-              }),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_electionNameController.text.isEmpty ||
-                    _startDateTime == null ||
-                    _endDateTime == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please fill all fields")),
-                  );
-                  return;
-                }
-                final newElection = Election(
-                  name: _electionNameController.text,
-                  start: _startDateTime,
-                  end: _endDateTime,
-                );
-                electionbase.createElection(newElection);
-                _electionNameController.clear();
-                _startDateTime = null;
-                _endDateTime = null;
-                Navigator.pop(context);
-              },
-              child: Text("Submit"),
-            ),
-          ],
-        );
-      },
-    );
+  late Map<String,dynamic> profile;
+
+  Future<void> getUserProfile() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      print("No user is logged in.");
+      return;
+    }
+
+     profile =
+        await supabase.from('profiles').select().eq('id', user.id).single();
+
+    
+    // print("Is Admin: ${profile['is_admin']}");
   }
 
-  Widget _buildDateTimePicker(
-    String label,
-    DateTime? dateTime,
-    Function(DateTime) onDatePicked,
-  ) {
-    return ListTile(
-      title: Text(
-        dateTime == null
-            ? label
-            : DateFormat('yyyy-MM-dd HH:mm').format(dateTime),
-      ),
-      trailing: Icon(Icons.calendar_today),
-      onTap: () async {
-        DateTime? picked = await _pickDateTime();
-        if (picked != null) onDatePicked(picked);
-      },
-    );
-  }
-
-  Future<DateTime?> _pickDateTime() async {
-    DateTime? date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (date == null) return null;
-
-    TimeOfDay? time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time == null) return null;
-
-    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  @override
+  void initState() {
+    getUserProfile();
+    super.initState();
   }
 
   void logout() async {
@@ -157,10 +63,11 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           children: [
             Text(
-              'UNIVOTE',
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
+              'Univote',
+              style: GoogleFonts.ultra(
+                //fontWeight: FontWeight.bold,
+                fontSize: 28,
+                letterSpacing: 1.5,
               ),
             ),
             Spacer(),
@@ -190,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: const Color.fromARGB(255, 34, 32, 52),
                   ),
                 ),
               ),
@@ -202,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(23),
                   ),
-                  color: Colors.black,
+                  color: const Color.fromARGB(255, 34, 32, 52),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -269,6 +176,29 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height: 30),
               Text(
+                'Results',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.blue.shade900,
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                width: 350,
+                height: 180,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ), // Apply border radius
+                  image: DecorationImage(
+                    image: AssetImage('assets/result.jpg'),
+                    fit: BoxFit.cover, // Ensures the image fills the container
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
                 'Active Elections',
                 style: GoogleFonts.outfit(
                   fontSize: 20,
@@ -293,7 +223,15 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: \${snapshot.error}"));
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(0),
+                      ),
+                    );
                   }
 
                   final elections = snapshot.data;
@@ -351,6 +289,7 @@ class _HomePageState extends State<HomePage> {
                           width: 300,
                           child: Card(
                             margin: const EdgeInsets.only(right: 12),
+                            color: const Color.fromARGB(255, 229, 243, 241),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                               side: BorderSide(color: Colors.blue, width: 2),
@@ -369,6 +308,12 @@ class _HomePageState extends State<HomePage> {
                                         style: GoogleFonts.outfit(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(
+                                            255,
+                                            34,
+                                            32,
+                                            52,
+                                          ),
                                         ),
                                       ),
                                       Chip(
@@ -401,8 +346,9 @@ class _HomePageState extends State<HomePage> {
                                             MaterialPageRoute(
                                               builder:
                                                   (context) =>
-                                                      AdminElectionDetails(
+                                                      UserElectionDetails(
                                                         elec: elec,
+                                                        profile: profile,
                                                       ),
                                             ),
                                           );
@@ -466,7 +412,15 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: \${snapshot.error}"));
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(1),
+                      ),
+                    );
                   }
 
                   final elections = snapshot.data;
@@ -523,6 +477,7 @@ class _HomePageState extends State<HomePage> {
                           width: 300,
                           child: Card(
                             margin: const EdgeInsets.only(right: 12),
+                            color: const Color.fromARGB(255, 244, 229, 217),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                               side: BorderSide(color: Colors.orange, width: 2),
@@ -541,6 +496,12 @@ class _HomePageState extends State<HomePage> {
                                         style: GoogleFonts.outfit(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(
+                                            255,
+                                            34,
+                                            32,
+                                            52,
+                                          ),
                                         ),
                                       ),
                                       Chip(
@@ -573,8 +534,9 @@ class _HomePageState extends State<HomePage> {
                                             MaterialPageRoute(
                                               builder:
                                                   (context) =>
-                                                      AdminElectionDetails(
+                                                      UserElectionDetails(
                                                         elec: elec,
+                                                        profile: profile,
                                                       ),
                                             ),
                                           );
@@ -609,7 +571,7 @@ class _HomePageState extends State<HomePage> {
                 style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: Colors.grey.shade700,
+                  color: Color.fromARGB(255, 66, 65, 82),
                 ),
               ),
               SizedBox(height: 10),
@@ -624,12 +586,20 @@ class _HomePageState extends State<HomePage> {
                         scrollDirection: Axis.horizontal,
                         itemCount: 5,
                         itemBuilder:
-                            (context, index) => buildShimmerElectionCard(1),
+                            (context, index) => buildShimmerElectionCard(2),
                       ),
                     );
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text("Error: \${snapshot.error}"));
+                    return SizedBox(
+                      height: 175,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 5,
+                        itemBuilder:
+                            (context, index) => buildShimmerElectionCard(2),
+                      ),
+                    );
                   }
 
                   final elections = snapshot.data;
@@ -677,7 +647,10 @@ class _HomePageState extends State<HomePage> {
                             margin: const EdgeInsets.only(right: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
-                              side: BorderSide(color: Colors.grey, width: 2),
+                              side: BorderSide(
+                                color: Color.fromARGB(255, 70, 69, 86),
+                                width: 2,
+                              ),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
@@ -693,13 +666,29 @@ class _HomePageState extends State<HomePage> {
                                         style: GoogleFonts.outfit(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(
+                                            255,
+                                            34,
+                                            32,
+                                            52,
+                                          ),
                                         ),
                                       ),
                                       Chip(
                                         label: Text('Ended'),
-                                        backgroundColor: Colors.grey.shade100,
+                                        backgroundColor: Color.fromARGB(
+                                          255,
+                                          165,
+                                          164,
+                                          181,
+                                        ),
                                         labelStyle: GoogleFonts.outfit(
-                                          color: Colors.grey.shade900,
+                                          color: Color.fromARGB(
+                                            255,
+                                            49,
+                                            48,
+                                            61,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -725,8 +714,9 @@ class _HomePageState extends State<HomePage> {
                                             MaterialPageRoute(
                                               builder:
                                                   (context) =>
-                                                      AdminElectionDetails(
+                                                      UserElectionDetails(
                                                         elec: elec,
+                                                        profile: profile,
                                                       ),
                                             ),
                                           );
@@ -774,12 +764,16 @@ Widget buildShimmerElectionCard(int type) {
       baseColor:
           type == 0
               ? Color.fromARGB(223, 196, 230, 249)
-              : Color.fromARGB(223, 249, 229, 196),
+              : type == 1
+              ? Color.fromARGB(223, 249, 229, 196)
+              : Color.fromARGB(223, 190, 189, 189),
 
       highlightColor:
           type == 0
               ? const Color.fromARGB(246, 237, 248, 248)
-              : const Color.fromARGB(246, 248, 243, 237),
+              : type == 1
+              ? const Color.fromARGB(246, 248, 243, 237)
+              : Color.fromARGB(246, 216, 216, 216),
       child: Card(
         margin: const EdgeInsets.only(right: 12),
         shape: RoundedRectangleBorder(
@@ -859,3 +853,59 @@ Widget buildShimmerElectionCard(int type) {
     ),
   );
 }
+
+
+
+
+
+
+// Container(
+//                 height: 200,
+//                 width: 350,
+//                 padding: EdgeInsets.all(8),
+//                 margin: EdgeInsets.all(8),
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(20),
+//                   color: const Color.fromARGB(196, 127, 135, 230),
+//                 ),
+//                 child: Row(
+//                   children: [
+//                     Container(
+//                       height: 200,
+//                       width: 135,
+//                       padding: EdgeInsets.all(8),
+//                       margin: EdgeInsets.all(8),
+//                       decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(20),
+//                         color: const Color.fromARGB(196, 32, 43, 161),
+//                       ),
+//                     ),
+//                     Column(
+//                       children: [
+//                         Container(
+//                           height: 78,
+//                           width: 135,
+
+//                           padding: EdgeInsets.all(8),
+//                           margin: EdgeInsets.all(8),
+//                           decoration: BoxDecoration(
+//                             borderRadius: BorderRadius.circular(20),
+//                             color: const Color.fromARGB(196, 32, 43, 161),
+//                           ),
+//                         ),
+//                         Container(
+//                           height: 78,
+//                           width: 135,
+
+//                           padding: EdgeInsets.all(8),
+//                           margin: EdgeInsets.all(8),
+//                           decoration: BoxDecoration(
+//                             borderRadius: BorderRadius.circular(20),
+//                             color: const Color.fromARGB(196, 32, 43, 161),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),

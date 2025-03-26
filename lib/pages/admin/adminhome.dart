@@ -263,6 +263,7 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
+
   final electionbase = ElectionBase();
   final _electionNameController = TextEditingController();
   DateTime? _startDateTime;
