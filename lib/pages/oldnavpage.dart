@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:univote/pages/homepage.dart';
+import 'package:univote/pages/profilepage.dart';
+import 'package:univote/pages/resultspage.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -12,12 +14,14 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
+  final PersistentTabController _tabController = PersistentTabController();
+
   List<Widget> screens() {
     return [
-      const HomePage(),
-      const HomePage(),
-      const HomePage(),
-      const HomePage(),
+      HomePage(tabController: _tabController),
+      HomePage(tabController: _tabController),
+       Resultspage(),
+      const ProfilePage(),
     ];
   }
 
@@ -77,7 +81,8 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      
+      backgroundColor: Colors.transparent,
       body: PersistentTabView(
         onWillPop: (context) async {
           return false;
@@ -85,7 +90,7 @@ class _BottomNavState extends State<BottomNav> {
         handleAndroidBackButtonPress: false,
         context,
         screens: screens(),
-
+        controller: _tabController,
         items: navbaritems(),
         navBarStyle: NavBarStyle.style12,
         resizeToAvoidBottomInset: true,

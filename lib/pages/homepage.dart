@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authservice.dart';
@@ -11,7 +12,8 @@ import 'package:intl/intl.dart';
 final supabase = Supabase.instance.client;
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final PersistentTabController tabController;
+  const HomePage({super.key, required this.tabController});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -21,12 +23,13 @@ class _HomePageState extends State<HomePage> {
   final electionbase = ElectionBase();
 
   final AuthService authService = AuthService();
+
   final _stream = supabase
       .from('elections')
       .stream(primaryKey: ['id'])
       .order('end', ascending: true);
 
-  late Map<String,dynamic> profile;
+  late Map<String, dynamic> profile;
 
   Future<void> getUserProfile() async {
     final user = supabase.auth.currentUser;
@@ -35,10 +38,9 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-     profile =
+    profile =
         await supabase.from('profiles').select().eq('id', user.id).single();
 
-    
     // print("Is Admin: ${profile['is_admin']}");
   }
 
@@ -71,10 +73,15 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Spacer(),
-            CircleAvatar(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              child: Text('AB'),
+            GestureDetector(
+              onTap: () {
+                widget.tabController.jumpToTab(3);
+              },
+              child: CircleAvatar(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                child: Text('AB'),
+              ),
             ),
           ],
         ),
@@ -85,7 +92,7 @@ class _HomePageState extends State<HomePage> {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.all(9),
+        padding: EdgeInsets.symmetric(horizontal: 9),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,74 +109,79 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 18),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.19,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(23),
-                  ),
-                  color: const Color.fromARGB(255, 34, 32, 52),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              'Active Elections',
-                              style: GoogleFonts.outfit(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+              GestureDetector(
+                onTap: () {
+                  widget.tabController.jumpToTab(2);
+                },
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * 0.19,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(23),
+                    ),
+                    color: const Color.fromARGB(255, 34, 32, 52),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                'Active Elections',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            FutureBuilder(
-                              future: supabase.from('elections').count(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const SpinKitThreeBounce(
-                                    size: 18,
-                                    color: Colors.amber,
-                                  );
-                                }
+                              const SizedBox(height: 8),
+                              FutureBuilder(
+                                future: supabase.from('elections').count(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const SpinKitThreeBounce(
+                                      size: 18,
+                                      color: Colors.amber,
+                                    );
+                                  }
 
-                                var data = snapshot.data;
-                                String count = data!.toString();
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    count,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
+                                  var data = snapshot.data;
+                                  String count = data!.toString();
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      count,
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        Icon(
-                          Icons.navigate_next_rounded,
-                          color: Colors.white,
-                          size: 60,
-                          shadows: const [
-                            BoxShadow(
-                              color: Color.fromARGB(170, 255, 243, 6),
-                              blurRadius: 18,
-                              offset: Offset(-2, 2),
-                              spreadRadius: 3,
-                            ),
-                          ],
-                        ),
-                      ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          Spacer(),
+                          Icon(
+                            Icons.navigate_next_rounded,
+                            color: Colors.white,
+                            size: 60,
+                            shadows: const [
+                              BoxShadow(
+                                color: Color.fromARGB(170, 255, 243, 6),
+                                blurRadius: 18,
+                                offset: Offset(-2, 2),
+                                spreadRadius: 3,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -748,7 +760,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              SizedBox(height: 50),
+              SizedBox(height: 150),
             ],
           ),
         ),
