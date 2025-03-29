@@ -14,6 +14,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // text controllers
   final nameController = TextEditingController();
+  final rollController = TextEditingController();
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final confirmPasswordTextController = TextEditingController();
@@ -22,26 +23,27 @@ class _RegisterPageState extends State<RegisterPage> {
   void register() async {
     // prepare data
     String name = nameController.text;
+    String rollno = rollController.text;
     String email = emailTextController.text;
     String password = passwordTextController.text;
     String confirmPassword = confirmPasswordTextController.text;
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Passwords do not match!")));
       return;
     }
 
     // attempt sign up..
     try {
-      await _auth.signUp(email, password, name);
+      await _auth.signUp(email, password, name, rollno);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
@@ -52,7 +54,8 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: Colors.blueAccent,
       appBar: AppBar(backgroundColor: Colors.blueAccent),
-      body: SingleChildScrollView(  // <-- Fix overflow
+      body: SingleChildScrollView(
+        // <-- Fix overflow
         child: Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 60),
@@ -63,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,  // <-- Important
+                mainAxisSize: MainAxisSize.min, // <-- Important
                 children: [
                   // ** Title: UNIVOTE **
                   const Text(
@@ -82,6 +85,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: nameController,
                     decoration: InputDecoration(
                       hintText: 'Username',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: rollController,
+                    decoration: InputDecoration(
+                      hintText: 'Roll Number',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -159,12 +173,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-
-
-
-
-
 
 // import 'package:flutter/material.dart';
 // import 'package:univote/auth/authservice.dart';

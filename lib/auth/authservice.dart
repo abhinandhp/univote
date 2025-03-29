@@ -12,12 +12,12 @@ class AuthService {
   }
 
   //signup
-  Future<void> signUp(String email, String pass,String name) async {
-    // return await _supabase.auth.signUp(
-    //   password: pass,
-    //   email: email,
-    // );
-
+  Future<void> signUp(
+    String email,
+    String pass,
+    String name,
+    String rollno,
+  ) async {
     try {
       final response = await _supabase.auth.signUp(
         email: email,
@@ -30,7 +30,8 @@ class AuthService {
           'id': response.user!.id,
           'email': email,
           'username': name,
-          'is_admin': false, // Default as regular user
+          'is_admin': false,
+          'rollno': rollno, // Default as regular user
         });
       }
     } catch (e) {
