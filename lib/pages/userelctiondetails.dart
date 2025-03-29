@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/supabase/candidbase.dart';
+import 'package:univote/pages/votingpage.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -141,10 +142,11 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
+      body: Stack(
+        children: [Padding(
+          padding: EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -288,16 +290,19 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => VotingPage())),
                   child: Text(
                     'CAST YOUR VOTE',
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
               ),
+              SizedBox(height: 90,)
             ],
           ),
         ),
+        )
+        ]
       ),
     );
   }
