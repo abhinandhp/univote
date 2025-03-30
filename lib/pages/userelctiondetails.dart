@@ -43,6 +43,8 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
   Widget build(BuildContext context) {
     Map<String, dynamic> elec = widget.elec;
 
+    late List<Map<String, dynamic>> nominees;
+
     DateTime now = DateTime.now();
 
     Duration remaining = DateTime.parse(elec["end"]).difference(now);
@@ -264,6 +266,7 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                                   (candidate) => candidate['approved'] == true,
                                 )
                                 .toList();
+                        nominees = approvedCands.cast<Map<String, dynamic>>();
 
                         if (approvedCands.isEmpty) {
                           return const Center(
@@ -297,23 +300,6 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                     ),
                   ),
                   SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        'CAST YOUR VOTE',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -328,7 +314,7 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                 onTap: () {
                   PersistentNavBarNavigator.pushNewScreen(
                     context,
-                    screen: VotingPage(),
+                    screen: VotingPage(elec: elec, nominees: nominees),
                     withNavBar: false, // OPTIONAL VALUE. True by default.
                     pageTransitionAnimation: PageTransitionAnimation.cupertino,
                   );
