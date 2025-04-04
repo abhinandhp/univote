@@ -304,41 +304,45 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 100,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () {
-                  PersistentNavBarNavigator.pushNewScreen(
-                    context,
-                    screen: VotingPage(elec: elec, nominees: nominees),
-                    withNavBar: false, // OPTIONAL VALUE. True by default.
-                    pageTransitionAnimation: PageTransitionAnimation.cupertino,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 23,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 22, 23, 49),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Text(
-                    "Cast Vote",
-                    style: GoogleFonts.outfit(
-                      fontSize: 25,
-                      color: Colors.white,
+          (DateTime.parse(elec['start']).isBefore(DateTime.now()) &&
+                  DateTime.parse(elec['end']).isAfter(DateTime.now()))
+              ? Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: () {
+                      PersistentNavBarNavigator.pushNewScreen(
+                        context,
+                        screen: VotingPage(elec: elec, nominees: nominees),
+                        withNavBar: false, // OPTIONAL VALUE. True by default.
+                        pageTransitionAnimation:
+                            PageTransitionAnimation.cupertino,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 23,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 22, 23, 49),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Text(
+                        "Cast Vote",
+                        style: GoogleFonts.outfit(
+                          fontSize: 25,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
+              )
+              : SizedBox(),
         ],
       ),
     );

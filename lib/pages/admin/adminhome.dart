@@ -1,250 +1,5 @@
-// import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:univote/auth/authservice.dart';
-// import 'package:univote/models/model.dart';
-// import 'package:univote/pages/admin/electiondetails.dart';
-// import 'package:univote/supabase/electionbase.dart';
-// import 'package:intl/intl.dart';
-
-// final supabase = Supabase.instance.client;
-
-// class AdminHome extends StatefulWidget {
-//   const AdminHome({super.key});
-
-//   @override
-//   State<AdminHome> createState() => _AdminHomeState();
-// }
-
-// class _AdminHomeState extends State<AdminHome> {
-//   final electionbase = ElectionBase();
-//   final _electionNameController = TextEditingController();
-//   DateTime? _startDateTime;
-//   DateTime? _endDateTime;
-
-//   void _showElectionDialog() async {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text("Create Election"),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               // Election Name Input
-//               TextField(
-//                 controller: _electionNameController,
-//                 decoration: InputDecoration(labelText: "Election Name"),
-//               ),
-
-//               // Start DateTime Picker
-//               ListTile(
-//                 title: Text(
-//                   _startDateTime == null
-//                       ? "Select Start Date & Time"
-//                       : "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(_startDateTime!)}",
-//                 ),
-//                 trailing: Icon(Icons.calendar_today),
-//                 onTap: () async {
-//                   DateTime? picked = await _pickDateTime();
-//                   if (picked != null) {
-//                     setState(() {
-//                       _startDateTime = picked;
-//                     });
-//                   }
-//                 },
-//               ),
-
-//               // End DateTime Picker
-//               ListTile(
-//                 title: Text(
-//                   _endDateTime == null
-//                       ? "Select End Date & Time"
-//                       : "End: ${DateFormat('yyyy-MM-dd HH:mm').format(_endDateTime!)}",
-//                 ),
-//                 trailing: Icon(Icons.calendar_today),
-//                 onTap: () async {
-//                   DateTime? picked = await _pickDateTime();
-//                   if (picked != null) {
-//                     setState(() {
-//                       _endDateTime = picked;
-//                     });
-//                   }
-//                 },
-//               ),
-//             ],
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context), // Close Dialog
-//               child: Text("Cancel"),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 print("debugggg");
-//                 if (_electionNameController.text.isEmpty ||
-//                     _startDateTime == null ||
-//                     _endDateTime == null) {
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     SnackBar(content: Text("Please fill all fields")),
-//                   );
-//                   return;
-//                 }
-//                 final newElection = Election(
-//                   name: _electionNameController.text,
-//                   start: _startDateTime,
-//                   end: _endDateTime,
-//                 );
-//                 electionbase.createElection(newElection);
-//                 // Handle election submission
-//                 print("Election Name: ${_electionNameController.text}");
-//                 print("Start DateTime: $_startDateTime");
-//                 print("End DateTime: $_endDateTime");
-
-//                 Navigator.pop(context); // Close Dialog
-//               },
-//               child: Text("Submit"),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   // Function to pick Date and Time
-//   Future<DateTime?> _pickDateTime() async {
-//     DateTime? date = await showDatePicker(
-//       context: context,
-//       initialDate: DateTime.now(),
-//       firstDate: DateTime(2000),
-//       lastDate: DateTime(2100),
-//     );
-
-//     if (date == null) return null; // User canceled
-
-//     TimeOfDay? time = await showTimePicker(
-//       context: context,
-//       initialTime: TimeOfDay.now(),
-//     );
-
-//     if (time == null) return null; // User canceled
-
-//     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
-//   }
-
-//   final _stream = supabase.from('elections').stream(primaryKey: ['id']);
-
-//   final AuthService authService=AuthService();
-//   void logout() async{
-//     try {
-//     await authService.signOut();
-
-//     } catch (e) {
-//       print(e);
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               "Admin Dashboard",
-//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 20),
-//             SizedBox(
-//               width: MediaQuery.of(context).size.width,
-//               child: SingleChildScrollView(
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                   children: [
-//                     GestureDetector(
-//                       onTap: _showElectionDialog,
-//                       child: Container(
-//                         height: 100,
-//                         width: 150,
-//                         margin: EdgeInsets.all(10),
-//                         decoration: BoxDecoration(
-//                           borderRadius: BorderRadius.circular(12),
-//                           gradient: LinearGradient(
-//                             colors: [
-//                               const Color.fromARGB(255, 170, 207, 237),
-//                               Colors.blueAccent,
-//                             ],
-//                           ),
-//                         ),
-//                         child: Center(child: Text("C")),
-//                       ),
-//                     ),
-//                     SizedBox(width: 10),
-//                     Container(
-//                       height: 100,
-//                       width: 160,
-//                       margin: EdgeInsets.all(10),
-
-//                       decoration: BoxDecoration(
-//                         borderRadius: BorderRadius.circular(12),
-//                         color: Colors.blueAccent,
-//                       ),
-//                       child: TextButton(onPressed: logout, child: Text("Logout")),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             SizedBox(height: 30),
-//             Text(
-//               "All Elections",
-//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 20),
-//             StreamBuilder(
-//               stream: _stream,
-//               builder: (context, snapshot) {
-//                 if (snapshot.connectionState == ConnectionState.waiting) {
-//                   return Center(child: CircularProgressIndicator());
-//                 }
-//                 if (snapshot.hasError) {
-//                   print(snapshot.error);
-//                   return Text(snapshot.error.toString());
-//                 }
-//                 final elections = snapshot.data;
-//                 return Expanded(
-//                   child: ListView.builder(
-//                     itemCount: elections!.length,
-//                     itemBuilder: (context, index) {
-//                       final elec = elections[index];
-//                       print(elec['name']);
-//                       return Padding(
-//                         padding: const EdgeInsets.all(12.0),
-//                         child: GestureDetector(
-//                           onTap: () {
-//                             Navigator.push(context, MaterialPageRoute(builder: (context) {
-//                               return AdminElectionDetails(elec: elec,);
-//                             },));
-//                           },
-//                           child: ListTile(
-//                             title: Text(elec['name']),
-
-//                           ),
-//                         ),
-//                       );
-//                     },
-//                   ),
-//                 );
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authservice.dart';
@@ -263,7 +18,6 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-
   final electionbase = ElectionBase();
   final _electionNameController = TextEditingController();
   DateTime? _startDateTime;
@@ -275,76 +29,99 @@ class _AdminHomeState extends State<AdminHome> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Text(
-            "Create Election",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _electionNameController,
-                decoration: InputDecoration(
-                  labelText: "Election Name",
-                  hintText: 'e.g., Class Representative',
-                ),
+        DateTime? startDateTime = _startDateTime;
+        DateTime? endDateTime = _endDateTime;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
               ),
-              SizedBox(height: 10),
-              _buildDateTimePicker("Select Start Date & Time", _startDateTime, (
-                dateTime,
-              ) {
-                setState(() => _startDateTime = dateTime);
-              }),
-              _buildDateTimePicker("Select End Date & Time", _endDateTime, (
-                dateTime,
-              ) {
-                if (_startDateTime != null &&
-                    dateTime.isBefore(_startDateTime!)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("End date cannot be before start date"),
+              title: Text(
+                "Create Election",
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _electionNameController,
+                    decoration: InputDecoration(
+                      labelStyle: GoogleFonts.outfit(),
+                      hintStyle: GoogleFonts.outfit(),
+                      labelText: "Election Name",
+                      hintText: 'e.g., Class Representative',
                     ),
-                  );
-                  return;
-                }
-                setState(() => _endDateTime = dateTime);
-              }),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_electionNameController.text.isEmpty ||
-                    _startDateTime == null ||
-                    _endDateTime == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please fill all fields")),
-                  );
-                  return;
-                }
-                final newElection = Election(
-                  name: _electionNameController.text,
-                  start: _startDateTime,
-                  end: _endDateTime,
-                );
-                electionbase.createElection(newElection);
-                _electionNameController.clear();
-                _startDateTime = null;
-                _endDateTime = null;
-                Navigator.pop(context);
-              },
-              child: Text("Submit"),
-            ),
-          ],
+                  ),
+                  SizedBox(height: 10),
+                  _buildDateTimePicker(
+                    "Select Start Date & Time",
+                    startDateTime,
+                    (dateTime) {
+                      setDialogState(() => startDateTime = dateTime);
+                    },
+                  ),
+                  _buildDateTimePicker("Select End Date & Time", endDateTime, (
+                    dateTime,
+                  ) {
+                    if (startDateTime != null &&
+                        dateTime.isBefore(startDateTime!)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                            "End date cannot be before start date",
+                            style: GoogleFonts.outfit(),
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    setDialogState(() => endDateTime = dateTime);
+                  }),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_electionNameController.text.isEmpty ||
+                        startDateTime == null ||
+                        endDateTime == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                            "Please fill all fields",
+                            style: GoogleFonts.outfit(),
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    final newElection = Election(
+                      name: _electionNameController.text,
+                      start: startDateTime,
+                      end: endDateTime,
+                    );
+                    electionbase.createElection(newElection);
+                    _electionNameController.clear();
+                    setState(() {
+                      _startDateTime = null;
+                      _endDateTime = null;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Text("Submit"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -360,6 +137,7 @@ class _AdminHomeState extends State<AdminHome> {
         dateTime == null
             ? label
             : DateFormat('yyyy-MM-dd HH:mm').format(dateTime),
+        style: GoogleFonts.outfit(),
       ),
       trailing: Icon(Icons.calendar_today),
       onTap: () async {
@@ -403,7 +181,10 @@ class _AdminHomeState extends State<AdminHome> {
           children: [
             Text(
               'UNIVOTE',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
             ),
             Spacer(),
             CircleAvatar(
@@ -419,14 +200,14 @@ class _AdminHomeState extends State<AdminHome> {
         elevation: 0,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(horizontal: 9),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Admin Dashboard",
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -440,9 +221,9 @@ class _AdminHomeState extends State<AdminHome> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Active Elections',
-                          style: TextStyle(
+                          style: GoogleFonts.outfit(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -451,7 +232,7 @@ class _AdminHomeState extends State<AdminHome> {
                         Text(
                           //  '${activeElections.length}',
                           '0',
-                          style: const TextStyle(
+                          style: GoogleFonts.outfit(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
@@ -469,8 +250,8 @@ class _AdminHomeState extends State<AdminHome> {
                 children: [
                   Text(
                     "Manage Elections",
-                    style: TextStyle(
-                      fontSize: 20,
+                    style: GoogleFonts.outfit(
+                      fontSize: 19,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -481,7 +262,7 @@ class _AdminHomeState extends State<AdminHome> {
                   ElevatedButton.icon(
                     onPressed: _showElectionDialog,
                     icon: const Icon(Icons.add),
-                    label: const Text('Create Election'),
+                    label: Text('Create Election', style: GoogleFonts.outfit()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue.shade900,
                       foregroundColor: Colors.white,
@@ -490,9 +271,9 @@ class _AdminHomeState extends State<AdminHome> {
                 ],
               ),
               SizedBox(height: 20),
-              const Text(
+              Text(
                 'Active Elections',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: Colors.blue,
@@ -588,7 +369,7 @@ class _AdminHomeState extends State<AdminHome> {
                                     children: [
                                       Text(
                                         elec['name'],
-                                        style: const TextStyle(
+                                        style: GoogleFonts.outfit(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -596,7 +377,7 @@ class _AdminHomeState extends State<AdminHome> {
                                       Chip(
                                         label: Text('Active'),
                                         backgroundColor: Colors.blue.shade100,
-                                        labelStyle: TextStyle(
+                                        labelStyle: GoogleFonts.outfit(
                                           color: Colors.blue.shade900,
                                         ),
                                       ),
@@ -605,7 +386,7 @@ class _AdminHomeState extends State<AdminHome> {
                                   const SizedBox(height: 2),
                                   Text(
                                     'Ends in: ${formatDuration(timeLeft)}',
-                                    style: TextStyle(
+                                    style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 16,
                                       color: Colors.blue,
@@ -664,9 +445,9 @@ class _AdminHomeState extends State<AdminHome> {
                 },
               ),
               SizedBox(height: 20),
-              const Text(
+              Text(
                 'Upcoming Elections',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Colors.orange,
@@ -760,7 +541,7 @@ class _AdminHomeState extends State<AdminHome> {
                                     children: [
                                       Text(
                                         elec['name'],
-                                        style: const TextStyle(
+                                        style: GoogleFonts.outfit(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -768,7 +549,7 @@ class _AdminHomeState extends State<AdminHome> {
                                       Chip(
                                         label: Text('Upcoming'),
                                         backgroundColor: Colors.orange.shade100,
-                                        labelStyle: TextStyle(
+                                        labelStyle: GoogleFonts.outfit(
                                           color: Colors.orange.shade900,
                                         ),
                                       ),
@@ -777,7 +558,7 @@ class _AdminHomeState extends State<AdminHome> {
                                   const SizedBox(height: 2),
                                   Text(
                                     'Starts in: ${formatDuration(timeLeft)}',
-                                    style: TextStyle(
+                                    style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 16,
                                       color: Colors.orange,
@@ -828,7 +609,7 @@ class _AdminHomeState extends State<AdminHome> {
               SizedBox(height: 20),
               Text(
                 'Past Elections',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Colors.grey.shade700,
@@ -912,7 +693,7 @@ class _AdminHomeState extends State<AdminHome> {
                                     children: [
                                       Text(
                                         elec['name'],
-                                        style: const TextStyle(
+                                        style: GoogleFonts.outfit(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -920,7 +701,7 @@ class _AdminHomeState extends State<AdminHome> {
                                       Chip(
                                         label: Text('Ended'),
                                         backgroundColor: Colors.grey.shade100,
-                                        labelStyle: TextStyle(
+                                        labelStyle: GoogleFonts.outfit(
                                           color: Colors.grey.shade900,
                                         ),
                                       ),
@@ -929,7 +710,7 @@ class _AdminHomeState extends State<AdminHome> {
                                   const SizedBox(height: 2),
                                   Text(
                                     'Ended on: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(elec['end']))}',
-                                    style: TextStyle(
+                                    style: GoogleFonts.outfit(
                                       color: Colors.grey.shade700,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
@@ -1071,249 +852,3 @@ Widget buildShimmerElectionCard() {
     ),
   );
 }
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:univote/auth/authservice.dart';
-// import 'package:univote/models/model.dart';
-// import 'package:univote/pages/admin/electiondetails.dart';
-// import 'package:univote/supabase/electionbase.dart';
-// import 'package:intl/intl.dart';
-
-// final supabase = Supabase.instance.client;
-
-// class AdminHome extends StatefulWidget {
-//   const AdminHome({super.key});
-
-//   @override
-//   State<AdminHome> createState() => _AdminHomeState();
-// }
-
-// class _AdminHomeState extends State<AdminHome> {
-//   final electionbase = ElectionBase();
-//   final _electionNameController = TextEditingController();
-//   DateTime? _startDateTime;
-//   DateTime? _endDateTime;
-
-//   void _showElectionDialog() async {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text("Create Election"),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               // Election Name Input
-//               TextField(
-//                 controller: _electionNameController,
-//                 decoration: InputDecoration(labelText: "Election Name"),
-//               ),
-
-//               // Start DateTime Picker
-//               ListTile(
-//                 title: Text(
-//                   _startDateTime == null
-//                       ? "Select Start Date & Time"
-//                       : "Start: ${DateFormat('yyyy-MM-dd HH:mm').format(_startDateTime!)}",
-//                 ),
-//                 trailing: Icon(Icons.calendar_today),
-//                 onTap: () async {
-//                   DateTime? picked = await _pickDateTime();
-//                   if (picked != null) {
-//                     setState(() {
-//                       _startDateTime = picked;
-//                     });
-//                   }
-//                 },
-//               ),
-
-//               // End DateTime Picker
-//               ListTile(
-//                 title: Text(
-//                   _endDateTime == null
-//                       ? "Select End Date & Time"
-//                       : "End: ${DateFormat('yyyy-MM-dd HH:mm').format(_endDateTime!)}",
-//                 ),
-//                 trailing: Icon(Icons.calendar_today),
-//                 onTap: () async {
-//                   DateTime? picked = await _pickDateTime();
-//                   if (picked != null) {
-//                     setState(() {
-//                       _endDateTime = picked;
-//                     });
-//                   }
-//                 },
-//               ),
-//             ],
-//           ),
-//           actions: [
-//             TextButton(
-//               onPressed: () => Navigator.pop(context), // Close Dialog
-//               child: Text("Cancel"),
-//             ),
-//             ElevatedButton(
-//               onPressed: () {
-//                 if (_electionNameController.text.isEmpty ||
-//                     _startDateTime == null ||
-//                     _endDateTime == null) {
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     SnackBar(content: Text("Please fill all fields")),
-//                   );
-//                   return;
-//                 }
-//                 final newElection = Election(
-//                   name: _electionNameController.text,
-//                   start: _startDateTime,
-//                   end: _endDateTime,
-//                 );
-//                 electionbase.createElection(newElection);
-//                 // // Handle election submission
-//                 // print("Election Name: ${_electionNameController.text}");
-//                 // print("Start DateTime: $_startDateTime");
-//                 // print("End DateTime: $_endDateTime");
-
-//                 Navigator.pop(context); // Close Dialog
-//               },
-//               child: Text("Submit"),
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   // Function to pick Date and Time
-//   Future<DateTime?> _pickDateTime() async {
-//     DateTime? date = await showDatePicker(
-//       context: context,
-//       initialDate: DateTime.now(),
-//       firstDate: DateTime(2000),
-//       lastDate: DateTime(2100),
-//     );
-
-//     if (date == null) return null; // User canceled
-
-//     TimeOfDay? time = await showTimePicker(
-//       context: context,
-//       initialTime: TimeOfDay.now(),
-//     );
-
-//     if (time == null) return null; // User canceled
-
-//     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
-//   }
-
-//   final _stream = supabase.from('elections').stream(primaryKey: ['id']);
-
-
-//   final AuthService authService=AuthService();
-//   void logout() async{
-//     try {
-//     await authService.signOut();
-
-//     } catch (e) {
-//       print(e);
-//     }
-//   }
-  
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               "Admin Dashboard",
-//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 20),
-//             SizedBox(
-//               width: MediaQuery.of(context).size.width,
-//               child: SingleChildScrollView(
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                   children: [
-//                     GestureDetector(
-//                       onTap: _showElectionDialog,
-//                       child: Container(
-//                         height: 100,
-//                         width: 150,
-//                         margin: EdgeInsets.all(10),
-//                         decoration: BoxDecoration(
-//                           borderRadius: BorderRadius.circular(12),
-//                           gradient: LinearGradient(
-//                             colors: [
-//                               const Color.fromARGB(255, 170, 207, 237),
-//                               Colors.blueAccent,
-//                             ],
-//                           ),
-//                         ),
-//                         child: Center(child: Text("Create Election")),
-//                       ),
-//                     ),
-//                     SizedBox(width: 10),
-//                     Container(
-//                       height: 100,
-//                       width: 160,
-//                       margin: EdgeInsets.all(10),
-
-//                       decoration: BoxDecoration(
-//                         borderRadius: BorderRadius.circular(12),
-//                         color: Colors.blueAccent,
-//                       ),
-//                       child: TextButton(onPressed: logout, child: Text("Logout")),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             SizedBox(height: 30),
-//             Text(
-//               "All Elections",
-//               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 20),
-//             StreamBuilder(
-//               stream: _stream,
-//               builder: (context, snapshot) {
-//                 if (snapshot.connectionState == ConnectionState.waiting) {
-//                   return Center(child: CircularProgressIndicator());
-//                 }
-//                 if (snapshot.hasError) {
-//                   return Text(snapshot.error.toString());
-//                 }
-//                 final elections = snapshot.data;
-//                 return Expanded(
-//                   child: ListView.builder(
-//                     itemCount: elections!.length,
-//                     itemBuilder: (context, index) {
-//                       final elec = elections[index];
-//                       return Padding(
-//                         padding: const EdgeInsets.all(12.0),
-//                         child: GestureDetector(
-//                           onTap: () {
-//                             Navigator.push(context, MaterialPageRoute(builder: (context) {
-//                               return AdminElectionDetails(elec: elec,);
-//                             },));
-//                           },
-//                           child: ListTile(
-//                             title: Text(elec['name']),
-                            
-//                           ),
-//                         ),
-//                       );
-//                     },
-//                   ),
-//                 );
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

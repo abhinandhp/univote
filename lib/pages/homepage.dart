@@ -120,67 +120,79 @@ class _HomePageState extends State<HomePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(23),
                     ),
-                    color: const Color.fromARGB(255, 34, 32, 52),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text(
-                                'Active Elections',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              FutureBuilder(
-                                future: supabase.from('elections').count(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const SpinKitThreeBounce(
-                                      size: 18,
-                                      color: Colors.amber,
-                                    );
-                                  }
 
-                                  var data = snapshot.data;
-                                  String count = data!.toString();
-                                  return Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                      count,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
+                    //color: const Color.fromARGB(255, 34, 32, 52),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(23),
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF1A237E), Color(0xFF303F9F)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text(
+                                  ' Results',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 22,
+                                    letterSpacing: 2,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                FutureBuilder(
+                                  future: supabase.from('elections').count(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const SpinKitThreeBounce(
+                                        size: 18,
+                                        color: Colors.amber,
+                                      );
+                                    }
+
+                                    var data = snapshot.data;
+                                    String count = data!.toString();
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(
+                                        count,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Icon(
-                            Icons.navigate_next_rounded,
-                            color: Colors.white,
-                            size: 60,
-                            shadows: const [
-                              BoxShadow(
-                                color: Color.fromARGB(170, 255, 243, 6),
-                                blurRadius: 18,
-                                offset: Offset(-2, 2),
-                                spreadRadius: 3,
-                              ),
-                            ],
-                          ),
-                        ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Icon(
+                              Icons.navigate_next_rounded,
+                              color: const Color.fromARGB(255, 236, 208, 83),
+                              size: 60,
+                              shadows: const [
+                                BoxShadow(
+                                  color: Color.fromARGB(170, 255, 243, 6),
+                                  blurRadius: 18,
+                                  offset: Offset(-2, 2),
+                                  spreadRadius: 3,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -437,10 +449,16 @@ class _HomePageState extends State<HomePage> {
 
                   final elections = snapshot.data;
                   if (elections == null || elections.isEmpty) {
-                    return const Card(
+                    return Card(
+                      color: const Color.fromARGB(255, 168, 185, 223),
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: Text('No upcoming elections')),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Center(
+                          child: Text(
+                            'No upcoming elections',
+                            style: GoogleFonts.outfit(fontSize: 18),
+                          ),
+                        ),
                       ),
                     );
                   }
@@ -455,10 +473,17 @@ class _HomePageState extends State<HomePage> {
                           .toList();
 
                   if (upcomingElections.isEmpty) {
-                    return const Card(
+                    return Card(
+                      color: const Color.fromARGB(255, 168, 185, 223),
+
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Center(child: Text('No upcoming elections')),
+                        child: Center(
+                          child: Text(
+                            'No upcoming elections',
+                            style: GoogleFonts.outfit(fontSize: 18),
+                          ),
+                        ),
                       ),
                     );
                   }

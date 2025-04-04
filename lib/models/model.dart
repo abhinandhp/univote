@@ -43,12 +43,20 @@ class Candidate {
   final int electionId;
   final String name;
   String rollno;
+  int votes;
+  bool isWinner;
+  bool approved;
+  String uid;
 
   Candidate({
     this.id,
     required this.electionId,
     required this.name,
-    required this.rollno
+    required this.rollno,
+    this.approved=false,
+    this.votes=0,
+    required this.uid,
+    this.isWinner=false
   });
 
   // Convert Candidate object to Map (for Supabase)
@@ -67,7 +75,11 @@ class Candidate {
       electionId: map['election_id'],
       name: map['name'],
       rollno: map['rollno'],
-      
+      votes: map['votes'],
+      isWinner: map['isWinner'],
+      uid:map['uid']
     );
   }
 }
+
+
