@@ -43,6 +43,8 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
   Widget build(BuildContext context) {
     Map<String, dynamic> elec = widget.elec;
 
+    late List<Map<String, dynamic>> nominees;
+
     DateTime now = DateTime.now();
 
     Duration remaining = DateTime.parse(elec["end"]).difference(now);
@@ -264,6 +266,7 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                                   (candidate) => candidate['approved'] == true,
                                 )
                                 .toList();
+                        nominees = approvedCands.cast<Map<String, dynamic>>();
 
                         if (approvedCands.isEmpty) {
                           return const Center(
@@ -297,62 +300,49 @@ class _UserElectionDetailsState extends State<UserElectionDetails> {
                     ),
                   ),
                   SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        'CAST YOUR VOTE',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
-          Positioned(
-            bottom: 100,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () {
-                  PersistentNavBarNavigator.pushNewScreen(
-                    context,
-                    screen: VotingPage(),
-                    withNavBar: false, // OPTIONAL VALUE. True by default.
-                    pageTransitionAnimation: PageTransitionAnimation.cupertino,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 23,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 22, 23, 49),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Text(
-                    "Cast Vote",
-                    style: GoogleFonts.outfit(
-                      fontSize: 25,
-                      color: Colors.white,
+          (DateTime.parse(elec['start']).isBefore(DateTime.now()) &&
+                  DateTime.parse(elec['end']).isAfter(DateTime.now()))
+              ? Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: () {
+                      PersistentNavBarNavigator.pushNewScreen(
+                        context,
+                        screen: VotingPage(elec: elec, nominees: nominees),
+                        withNavBar: false, // OPTIONAL VALUE. True by default.
+                        pageTransitionAnimation:
+                            PageTransitionAnimation.cupertino,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 23,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 22, 23, 49),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Text(
+                        "Cast Vote",
+                        style: GoogleFonts.outfit(
+                          fontSize: 25,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
+              )
+              : SizedBox(),
         ],
       ),
     );

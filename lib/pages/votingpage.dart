@@ -4,7 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class VotingPage extends StatefulWidget {
-  const VotingPage({super.key});
+  final List<Map<String, dynamic>> nominees;
+  final Map<String, dynamic> elec;
+  const VotingPage({super.key, required this.nominees, required this.elec});
 
   @override
   State<VotingPage> createState() => _VotingPageState();
@@ -12,10 +14,7 @@ class VotingPage extends StatefulWidget {
 
 class _VotingPageState extends State<VotingPage> {
   Map<String, dynamic>? selectedCandidate;
-  final _stream = Supabase.instance.client
-      .from('candidates')
-      .stream(primaryKey: ['id']);
-
+  late List<Map<String, dynamic>> candidates;
   void submitVote() async {
     if (selectedCandidate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -30,6 +29,49 @@ class _VotingPageState extends State<VotingPage> {
         ),
       );
       return;
+    }
+
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+
+    try {
+      await supabase.from('votes').insert({
+        'voter_id': user!.id,
+        'candidate_id': selectedCandidate!['name'] == 'NOTA' ? null :selectedCandidate!['id'],
+        'election_id': widget.elec['id'],
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Vote submitted successfully! ✅',
+            style: GoogleFonts.outfit(fontSize: 15),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (e.toString().contains('duplicate key value')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'You have already voted in this election! ❌',
+              style: GoogleFonts.outfit(fontSize: 15),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error: ${e.toString()}',
+              style: GoogleFonts.outfit(fontSize: 15),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
 
     // try {
@@ -56,15 +98,35 @@ class _VotingPageState extends State<VotingPage> {
   }
 
   @override
+  void initState() {
+    candidates = widget.nominees;
+    candidates.add({
+      'id': -1,
+      'created_at': '2025-03-26T18:28:06.153021+00:00',
+      'name': 'NOTA',
+      'rollno': "#########",
+      'electionId': -1,
+      'approved': true,
+      'uid': "######",
+    });
+
+    candidates.sort((a, b) => a['id'].compareTo(b['id']));
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: const Text(
+        title: Text(
           'Vote for Your Candidate',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: GoogleFonts.outfit(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
@@ -76,83 +138,64 @@ class _VotingPageState extends State<VotingPage> {
             colors: [Colors.blue.shade50, Colors.purple.shade50],
           ),
         ),
-        child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                stream: _stream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
-                  }
-                  if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
-                    return const Center(child: Text("No candidates available"));
-                  }
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
 
-                  final candidates =
-                      (snapshot.data as List<dynamic>)
-                          .where((cand) => cand['approved'] == true)
-                          .toList();
+          itemCount: candidates.length,
+          itemBuilder: (context, index) {
+            final candidate = candidates[index];
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: candidates.length,
-                    itemBuilder: (context, index) {
-                      final candidate = candidates[index];
-
-                      return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: const BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: RadioListTile<Map<String, dynamic>>(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                title: Text(
-                                  candidate['name'],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        selectedCandidate == candidate
-                                            ? Colors.blue
-                                            : Colors.black87,
-                                  ),
-                                ),
-                                value: candidate,
-                                groupValue: selectedCandidate,
-                                activeColor: Colors.blue,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedCandidate = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          )
-                          .animate()
-                          .fadeIn(duration: 300.ms)
-                          .slideY(begin: 0.1, end: 0);
-                    },
-                  );
-                },
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
               ),
-            ),
-          ],
+              child: Card(
+                elevation: selectedCandidate == candidate ? 5 : 0,
+                shadowColor: const Color.fromARGB(255, 45, 219, 54),
+                
+                color:
+                    selectedCandidate == candidate
+                        ? const Color.fromARGB(255, 45, 219, 54)
+                        : Colors.white,
+                shape: RoundedRectangleBorder(
+                  
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: RadioListTile<Map<String, dynamic>>(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  title: Text(
+                    candidate['name'],
+                    style: GoogleFonts.outfit(
+                      fontSize: selectedCandidate == candidate ? 20 : 16,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          /*selectedCandidate == candidate
+                              ? Colors.blue
+                              :*/
+                          Colors.black87,
+                    ),
+                  ),
+                  value: candidate,
+                  groupValue: selectedCandidate,
+                  activeColor: Colors.black,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCandidate = value;
+                    });
+                  },
+                ),
+              ),
+            ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0);
+          },
         ),
       ),
       bottomNavigationBar: Stack(

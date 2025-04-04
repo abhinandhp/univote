@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authgateway.dart';
-import 'package:univote/pages/resultspage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

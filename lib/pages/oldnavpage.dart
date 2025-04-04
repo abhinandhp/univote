@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
@@ -20,7 +21,7 @@ class _BottomNavState extends State<BottomNav> {
     return [
       HomePage(tabController: _tabController),
       HomePage(tabController: _tabController),
-       Resultspage(),
+      ResultPage(),
       const ProfilePage(),
     ];
   }
@@ -52,7 +53,7 @@ class _BottomNavState extends State<BottomNav> {
         activeColorSecondary: Colors.yellow,
       ),
       PersistentBottomNavBarItem(
-        icon: const Icon(LineIcons.fireExtinguisher),
+        icon: const Icon(CupertinoIcons.chart_bar_alt_fill),
         title: 'Results',
         textStyle: GoogleFonts.outfit(
           color: Colors.white,
@@ -81,7 +82,6 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: Colors.transparent,
       body: PersistentTabView(
         onWillPop: (context) async {
