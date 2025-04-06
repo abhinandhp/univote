@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authgateway.dart';
-import 'package:univote/pages/resultspage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

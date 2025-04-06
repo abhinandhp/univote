@@ -210,20 +210,6 @@ class ElectionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Container(
-                //   padding: const EdgeInsets.symmetric(
-                //     horizontal: 8,
-                //     vertical: 4,
-                //   ),
-                //   decoration: BoxDecoration(
-                //     color: Colors.white.withOpacity(0.2),
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
-                //   child: Text(
-                //     "position",
-                //     style: const TextStyle(color: Colors.white, fontSize: 12),
-                //   ),
-                // ),
                 const SizedBox(height: 8),
                 Text(
                   election.name,
@@ -269,13 +255,10 @@ class ElectionCard extends StatelessWidget {
                     color: Colors.grey[300],
                   ),
                   child: Center(
-                    child: Text(
-                      '?',
-                      style: GoogleFonts.outfit(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                    child: Icon(
+                      Icons.emoji_events,
+                      color: Colors.amber,
+                      size: 25,
                     ),
                   ),
                 ),
@@ -283,6 +266,7 @@ class ElectionCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text(
                         election.winner,
@@ -293,7 +277,7 @@ class ElectionCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+
                       Row(
                         children: [
                           const Icon(
@@ -308,26 +292,6 @@ class ElectionCard extends StatelessWidget {
                               color: Colors.grey,
                               fontSize: 14,
                             ),
-                          ),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'votes ?? 0',
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                '$winnerVotePercentage% of votes',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
