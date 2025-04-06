@@ -26,11 +26,7 @@ class ElectionService {
               end:
                   DateTime.tryParse(electionData['end'] ?? '') ??
                   DateTime(2000, 1, 1),
-              candidates:
-                  (electionData['candidates'] as List<dynamic>?)
-                      ?.cast<String>() ??
-                  [],
-              noOfCandidates: electionData['noOfCandidates'] ?? 0,
+              winner: electionData['winner'] ?? 'Not Declared',
             );
           }).toList();
 
@@ -41,46 +37,49 @@ class ElectionService {
     }
   }
 
-  /// Fetch all candidates for a given election ID
-  Future<List<Candidate>> fetchCandidatesForElection(int electionId) async {
-    try {
-      final List<dynamic> candidatesData = await _supabaseClient
-          .from('candidates')
-          .select()
-          .eq('electionId', electionId)
-          .eq('approved', true);
+  Future<List<Map<String, dynamic>>> fetchResults(int id) async {
+    final candidatesResponse = await _supabaseClient
+        .from('candidates')
+        .select()
+        .eq('electionId', id)
+        .eq('approved', true);
 
-      List<Candidate> candidates =
-          candidatesData.map((candidateJson) {
-            return Candidate.fromMap(candidateJson);
-          }).toList();
+    final List<Map<String, dynamic>> candidates =
+        List<Map<String, dynamic>>.from(candidatesResponse);
 
-      // Determine the winner
-      Candidate? winner =
-          candidates.isNotEmpty
-              ? candidates.reduce((a, b) => a.votes > b.votes ? a : b)
-              : null;
+    // Fetch and count NOTA votes
+    final notaVotesResponse = await _supabaseClient
+        .from('votes')
+        .select('id')
+        .filter('candidate_id', 'is', null)
+        .eq('election_id', id);
 
-      // Update winner status
-      candidates =
-          candidates.map((candidate) {
-            return Candidate(
-              id: candidate.id,
-              name: candidate.name,
-              rollno: candidate.rollno,
-              electionId: candidate.electionId,
-              uid: candidate.uid,
-              votes: candidate.votes,
-              approved: candidate.approved,
-              isWinner: candidate.id == winner?.id,
-            );
-          }).toList();
+    final int notaVoteCount = notaVotesResponse.length;
 
-      return candidates;
-    } catch (e) {
-      print('Error fetching candidates for election ID $electionId: $e');
-      return [];
+    // Count votes for each candidate
+    for (var candidate in candidates) {
+      final voteResponse = await _supabaseClient
+          .from('votes')
+          .select('id')
+          .eq('candidate_id', candidate['id']);
+
+      candidate['voteCount'] = voteResponse.length;
     }
+
+    // Add NOTA as a special candidate entry
+    candidates.add({
+      'id': null,
+      'name': 'NOTA',
+      'voteCount': notaVoteCount,
+      'rollno': '-',
+    });
+
+    // Sort by vote count descending
+    candidates.sort(
+      (a, b) => (b['voteCount'] as int).compareTo(a['voteCount'] as int),
+    );
+
+    return candidates;
   }
 
   List<Election> _getMockElections() {
@@ -90,8 +89,6 @@ class ElectionService {
         name: 'Student Council President',
         start: DateTime(2024, 3, 1),
         end: DateTime(2024, 3, 15),
-        candidates: ['Alex Johnson', 'Sam Rodriguez'],
-        noOfCandidates: 2,
       ),
     ];
   }

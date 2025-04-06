@@ -82,6 +82,7 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: PersistentTabView(
         onWillPop: (context) async {
@@ -96,13 +97,12 @@ class _BottomNavState extends State<BottomNav> {
         resizeToAvoidBottomInset: true,
         navBarHeight: 75,
         padding: const EdgeInsets.all(10),
-        margin: EdgeInsets.only(right: 15, left: 15, bottom: 10),
-
+        margin: EdgeInsets.only(right: 15, left: 15, bottom: 15),
+        hideNavigationBarWhenKeyboardAppears: false,
         decoration: NavBarDecoration(
           colorBehindNavBar: Colors.white,
           borderRadius: BorderRadius.circular(25),
         ),
-        //handleAndroidBackButtonPress: true,
         backgroundColor: const Color.fromARGB(255, 25, 24, 40),
         stateManagement: true,
       ),

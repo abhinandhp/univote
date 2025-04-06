@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:line_icons/line_icons.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:univote/pages/resultdetails.dart';
 import 'package:univote/models/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,26 +39,49 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Results', style: GoogleFonts.outfit()),
+        shadowColor: Colors.transparent,
+        backgroundColor: Colors.white,
+        title: Text(
+          ' Results',
+          style: GoogleFonts.ultra(
+            color: const Color.fromARGB(255, 35, 19, 108),
+            fontSize: 30,
+            letterSpacing: 1.5,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              CupertinoIcons.refresh_bold,
+              color: Color.fromARGB(255, 24, 13, 91),
+              size: 20,
+            ),
             onPressed: _refreshElections,
           ),
+          SizedBox(width: 10),
         ],
       ),
       body: Column(
         children: [
           // Search Input
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             child: TextField(
               controller: _searchController,
+
               decoration: InputDecoration(
                 labelText: "Search Elections",
                 labelStyle: GoogleFonts.outfit(),
-                prefixIcon: const Icon(Icons.search),
+
+                prefixIcon: const Icon(
+                  LineIcons.searchengin,
+                  size: 34,
+                  color: Color.fromARGB(255, 243, 170, 33),
+                ),
+                hoverColor: const Color.fromARGB(255, 24, 13, 91),
+                focusColor: const Color.fromARGB(255, 24, 13, 91),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -129,13 +155,24 @@ class _ResultPageState extends State<ResultPage> {
                   itemCount: filteredElections.length,
                   itemBuilder: (context, index) {
                     final election = filteredElections[index];
-                    return ElectionCard(election: election);
+                    return GestureDetector(
+                      onTap: () {
+                        PersistentNavBarNavigator.pushNewScreen(
+                          context,
+                          screen: ResultDetailsPage(election: election),
+                          withNavBar: false,
+                          pageTransitionAnimation:
+                              PageTransitionAnimation.cupertino,
+                        );
+                      },
+                      child: ElectionCard(election: election),
+                    );
                   },
                 );
               },
             ),
           ),
-          SizedBox(height: 80),
+          SizedBox(height: 85),
         ],
       ),
     );
@@ -156,7 +193,7 @@ class ElectionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,20 +210,6 @@ class ElectionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Container(
-                //   padding: const EdgeInsets.symmetric(
-                //     horizontal: 8,
-                //     vertical: 4,
-                //   ),
-                //   decoration: BoxDecoration(
-                //     color: Colors.white.withOpacity(0.2),
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
-                //   child: Text(
-                //     "position",
-                //     style: const TextStyle(color: Colors.white, fontSize: 12),
-                //   ),
-                // ),
                 const SizedBox(height: 8),
                 Text(
                   election.name,
@@ -232,13 +255,10 @@ class ElectionCard extends StatelessWidget {
                     color: Colors.grey[300],
                   ),
                   child: Center(
-                    child: Text(
-                      '?',
-                      style: GoogleFonts.outfit(
-                        color: Colors.black54,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                    child: Icon(
+                      Icons.emoji_events,
+                      color: Colors.amber,
+                      size: 25,
                     ),
                   ),
                 ),
@@ -246,9 +266,10 @@ class ElectionCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text(
-                        'No winner',
+                        election.winner,
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -256,7 +277,7 @@ class ElectionCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+
                       Row(
                         children: [
                           const Icon(
@@ -271,26 +292,6 @@ class ElectionCard extends StatelessWidget {
                               color: Colors.grey,
                               fontSize: 14,
                             ),
-                          ),
-                          const Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'votes ?? 0',
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                '$winnerVotePercentage% of votes',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
