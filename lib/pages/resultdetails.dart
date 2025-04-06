@@ -1,202 +1,607 @@
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/models/model.dart';
-import 'package:univote/pages/result_card.dart';
+import 'package:univote/supabase/electionservice.dart';
 
+class ResultDetailsPage extends StatefulWidget {
+  final Election election;
 
-class ResultDetailsScreen extends StatefulWidget {
-  //final String electionId;
-
-  const ResultDetailsScreen({
-    Key? key,
-    //required this.electionId,
-  }) : super(key: key);
+  const ResultDetailsPage({super.key, required this.election});
 
   @override
-  State<ResultDetailsScreen> createState() => _ResultDetailsScreenState();
+  State<ResultDetailsPage> createState() => _ResultDetailsPageState();
 }
 
-class _ResultDetailsScreenState extends State<ResultDetailsScreen> {
-  //late ElectionService _electionService;
-  //late Future<Election?> _electionFuture;
-  bool _isLoading = true;
-  String? _error;
+class _ResultDetailsPageState extends State<ResultDetailsPage> {
+  final ElectionService _electionService = ElectionService(
+    Supabase.instance.client,
+  );
+  late Future<List<Map<String, dynamic>>> _resultsFuture;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   final supabase = Supabase.instance.client;
-  //   //_electionService = ElectionService(supabase);
-  //   _loadElection();
-  // }
+  // Define a list of distinct colors for candidates
+  final List<Map<String, dynamic>> candidateColorSchemes = [
+    {
+      'primary': const Color(0xFF5C6BC0), // Indigo
+      'light': const Color(0xFFE8EAF6),
+      'gradient': const [Color(0xFF5C6BC0), Color(0xFF3949AB)],
+    },
+    {
+      'primary': const Color(0xFF26A69A), // Teal
+      'light': const Color(0xFFE0F2F1),
+      'gradient': const [Color(0xFF26A69A), Color(0xFF00897B)],
+    },
+    {
+      'primary': const Color(0xFFEF5350), // Red
+      'light': const Color(0xFFFFEBEE),
+      'gradient': const [Color(0xFFEF5350), Color(0xFFE53935)],
+    },
+    {
+      'primary': const Color(0xFF66BB6A), // Green
+      'light': const Color(0xFFE8F5E9),
+      'gradient': const [Color(0xFF66BB6A), Color(0xFF4CAF50)],
+    },
+    {
+      'primary': const Color(0xFFFFB300), // Amber
+      'light': const Color(0xFFFFF8E1),
+      'gradient': const [Color(0xFFFFB300), Color(0xFFFFA000)],
+    },
+    {
+      'primary': const Color(0xFF8D6E63), // Brown
+      'light': const Color(0xFFEFEBE9),
+      'gradient': const [Color(0xFF8D6E63), Color(0xFF795548)],
+    },
+    {
+      'primary': const Color(0xFF7E57C2), // Deep Purple
+      'light': const Color(0xFFEDE7F6),
+      'gradient': const [Color(0xFF7E57C2), Color(0xFF673AB7)],
+    },
+    {
+      'primary': const Color(0xFF42A5F5), // Blue
+      'light': const Color(0xFFE3F2FD),
+      'gradient': const [Color(0xFF42A5F5), Color(0xFF2196F3)],
+    },
+    {
+      'primary': const Color(0xFFEC407A), // Pink
+      'light': const Color(0xFFFCE4EC),
+      'gradient': const [Color(0xFFEC407A), Color(0xFFE91E63)],
+    },
+    {
+      'primary': const Color(0xFFFF7043), // Deep Orange
+      'light': const Color(0xFFFBE9E7),
+      'gradient': const [Color(0xFFFF7043), Color(0xFFFF5722)],
+    },
+  ];
 
-  // void _loadElection() {
-  //   _electionFuture = _electionService.fetchElectionById(widget.electionId);
-  //   _electionFuture.then((_) {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //     }
-  //   }).catchError((e) {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isLoading = false;
-  //         _error = e.toString();
-  //       });
-  //     }
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _resultsFuture = _electionService.fetchResults(widget.election.id!);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Election Details'),
         elevation: 0,
-      ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Failed to load election details',
-              style: TextStyle(color: Colors.red[700], fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isLoading = true;
-                  _error = null;
-                });
-                //_loadElection();
-              },
-              child: const Text('Try Again'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return FutureBuilder(
-      future: Future.delayed(Durations.long1),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('Election not found'));
-        }
-
-        final election = snapshot.data!;
-        // Sort candidates by votes (highest first)
-        final sortedCandidates = [...election.candidates]
-          ..sort((a, b) => b.votes.compareTo(a.votes));
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                election.name,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildElectionMeta(election),
-              if (election.description != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  election.description!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 24),
-              Card(
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Results for ${election.position}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ...sortedCandidates.map((candidate) {
-                        return CandidateResultCard(
-                          candidate: candidate,
-                          totalVotes: election.totalVotes,
-                        );
-                      }).toList(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        backgroundColor: const Color(0xFF3949AB),
+        foregroundColor: Colors.white,
+        title: Text(
+          'Election Results',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildElectionMeta(Election election) {
-    final dateFormat = DateFormat('MMM d, yyyy');
-    final startDate = dateFormat.format(election.start!);
-    final endDate = dateFormat.format(election.end!);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-            const SizedBox(width: 4),
-            Text(
-              '$startDate - $endDate',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
         ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            const Icon(Icons.people, size: 16, color: Colors.grey),
-            const SizedBox(width: 4),
-            Text(
-              '{election.totalVotes} total votes',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
-      ],
+      ),
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _resultsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF3949AB)),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Color(0xFFE53935),
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: ${snapshot.error}',
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFFE53935),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final candidates = snapshot.data!;
+          final totalVotes = candidates.fold<int>(
+            0,
+            (sum, c) => sum + ((c['voteCount'] ?? 0) as int),
+          );
+
+          if (candidates.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/empty_state.png',
+                    height: 120,
+                    // Replace with your actual image asset or remove if not available
+                    errorBuilder:
+                        (context, error, stackTrace) => const Icon(
+                          Icons.ballot_outlined,
+                          size: 80,
+                          color: Color(0xFFBDBDBD),
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'No candidates or votes found.',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF757575),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final firstVoteCount = candidates.first['voteCount'];
+          final isDraw = candidates.every(
+            (c) => c['voteCount'] == firstVoteCount,
+          );
+
+          // Sort candidates by vote count (highest first)
+          candidates.sort(
+            (a, b) => (b['voteCount'] ?? 0).compareTo(a['voteCount'] ?? 0),
+          );
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Election header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3949AB), Color(0xFF5C6BC0)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.how_to_vote, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.election.name,
+                            style: GoogleFonts.outfit(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white30,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Total Votes: $totalVotes',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    color: Colors.white70,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Start: ${widget.election.start ?? ''}',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.event_available,
+                                    color: Colors.white70,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'End: ${widget.election.end ?? ''}',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              Text(
+                'Candidates',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF3949AB),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Candidate cards
+              ...candidates.asMap().entries.map((entry) {
+                final index = entry.key;
+                final candidate = entry.value;
+                final voteCount = candidate['voteCount'] ?? 0;
+                final votePercentage =
+                    totalVotes > 0 ? (voteCount / totalVotes * 100).round() : 0;
+                final isWinner = !isDraw && index == 0;
+
+                // Get color scheme based on index, with wraparound for more candidates than colors
+                final colorScheme =
+                    candidateColorSchemes[index % candidateColorSchemes.length];
+
+                // For the winner, we can use a special gold color scheme if desired
+                final Map<String, dynamic> tileColorScheme =
+                    isWinner
+                        ? {
+                          'primary': const Color(0xFFFFB300),
+                          'light': const Color(0xFFFFF8E1),
+                          'gradient': const [
+                            Color(0xFFFFB300),
+                            Color(0xFFFFA000),
+                          ],
+                        }
+                        : colorScheme;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side:
+                        isWinner
+                            ? const BorderSide(
+                              color: Color(0xFFFFC107),
+                              width: 2,
+                            )
+                            : BorderSide.none,
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      border:
+                          isWinner
+                              ? Border.all(
+                                color: const Color(0xFFFFC107),
+                                width: 2,
+                              )
+                              : null,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Avatar with initials
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: tileColorScheme['gradient'],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: (tileColorScheme['primary']
+                                              as Color)
+                                          .withOpacity(0.3),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    (candidate['name'] ?? 'N')[0].toUpperCase(),
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+
+                              // Name and winner badge
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      candidate['name'] ?? 'Unnamed',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    if (isWinner)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFB300),
+                                              Color(0xFFFFC107),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFFFFC107,
+                                              ).withOpacity(0.4),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.emoji_events,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'Winner',
+                                              style: GoogleFonts.outfit(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+
+                              // Vote count and %
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: tileColorScheme['light'] as Color,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '$voteCount',
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color:
+                                            tileColorScheme['primary'] as Color,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$votePercentage% of votes',
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Vote progress bar
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Vote Count',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Text(
+                                    '$voteCount / $totalVotes',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 10,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor:
+                                      totalVotes > 0
+                                          ? voteCount / totalVotes
+                                          : 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      gradient: LinearGradient(
+                                        colors: tileColorScheme['gradient'],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (tileColorScheme['primary']
+                                                  as Color)
+                                              .withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 32),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.pie_chart, color: Color(0xFF3949AB)),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Votes Distribution',
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF3949AB),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    buildPieChart(candidates),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 120),
+            ],
+          );
+        },
+      ),
     );
   }
 }

@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:line_icons/line_icons.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:univote/pages/resultdetails.dart';
 import 'package:univote/models/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,26 +39,49 @@ class _ResultPageState extends State<ResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Results', style: GoogleFonts.outfit()),
+        shadowColor: Colors.transparent,
+        backgroundColor: Colors.white,
+        title: Text(
+          ' Results',
+          style: GoogleFonts.ultra(
+            color: const Color.fromARGB(255, 35, 19, 108),
+            fontSize: 30,
+            letterSpacing: 1.5,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              CupertinoIcons.refresh_bold,
+              color: Color.fromARGB(255, 24, 13, 91),
+              size: 20,
+            ),
             onPressed: _refreshElections,
           ),
+          SizedBox(width: 10),
         ],
       ),
       body: Column(
         children: [
           // Search Input
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             child: TextField(
               controller: _searchController,
+
               decoration: InputDecoration(
                 labelText: "Search Elections",
                 labelStyle: GoogleFonts.outfit(),
-                prefixIcon: const Icon(Icons.search),
+
+                prefixIcon: const Icon(
+                  LineIcons.searchengin,
+                  size: 34,
+                  color: Color.fromARGB(255, 243, 170, 33),
+                ),
+                hoverColor: const Color.fromARGB(255, 24, 13, 91),
+                focusColor: const Color.fromARGB(255, 24, 13, 91),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -129,13 +155,24 @@ class _ResultPageState extends State<ResultPage> {
                   itemCount: filteredElections.length,
                   itemBuilder: (context, index) {
                     final election = filteredElections[index];
-                    return ElectionCard(election: election);
+                    return GestureDetector(
+                      onTap: () {
+                        PersistentNavBarNavigator.pushNewScreen(
+                          context,
+                          screen: ResultDetailsPage(election: election),
+                          withNavBar: false,
+                          pageTransitionAnimation:
+                              PageTransitionAnimation.cupertino,
+                        );
+                      },
+                      child: ElectionCard(election: election),
+                    );
                   },
                 );
               },
             ),
           ),
-          SizedBox(height: 80),
+          SizedBox(height: 85),
         ],
       ),
     );
@@ -156,7 +193,7 @@ class ElectionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +285,7 @@ class ElectionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'No winner',
+                        election.winner,
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
