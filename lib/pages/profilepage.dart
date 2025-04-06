@@ -19,6 +19,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:univote/pages/loginpage.dart';
+import 'package:univote/auth/authservice.dart';
+
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -41,16 +43,17 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => LoginPage()),
-  );
-},
-              child: Text(
-                'Logout',
-                style: TextStyle(
-                  fontSize: 16,
+               onPressed: () async {
+               await AuthService().signOut();
+               Navigator.pushReplacement(
+                context,
+               MaterialPageRoute(builder: (context) => LoginPage()),
+             );
+             },
+               child: Text(
+                 'Logout',
+                 style: TextStyle(
+                   fontSize: 16,
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
@@ -85,9 +88,7 @@ class ProfilePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                
               ),
-    
               child: Text(
                 "Edit Profile",
                 style: TextStyle(fontSize: 16, color: Colors.white),
