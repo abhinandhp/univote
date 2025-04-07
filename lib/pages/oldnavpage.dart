@@ -6,6 +6,7 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:univote/pages/homepage.dart';
 import 'package:univote/pages/profilepage.dart';
 import 'package:univote/pages/resultspage.dart';
+import 'package:univote/pages/user/activeelection.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -20,9 +21,9 @@ class _BottomNavState extends State<BottomNav> {
   List<Widget> screens() {
     return [
       HomePage(tabController: _tabController),
-      HomePage(tabController: _tabController),
+      Activeelection(),
       ResultPage(),
-      const ProfilePage(),
+      ProfilePage(),
     ];
   }
 
@@ -53,7 +54,7 @@ class _BottomNavState extends State<BottomNav> {
         activeColorSecondary: Colors.yellow,
       ),
       PersistentBottomNavBarItem(
-        icon: const Icon(CupertinoIcons.chart_bar_alt_fill),
+        icon: const Icon(Icons.bar_chart_rounded),
         title: 'Results',
         textStyle: GoogleFonts.outfit(
           color: Colors.white,

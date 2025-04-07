@@ -912,6 +912,11 @@ class _HomePageState extends State<HomePage> {
     return profile;
   }
 
+  Future<int> resultcount() async {
+    final data = await supabase.from('elections').select().eq('publish', true);
+    return data.length;
+  }
+
   @override
   void initState() {
     getUserProfile();
@@ -1059,7 +1064,39 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 32),
 
                   // Active Elections
-                  _buildSectionHeader('Active Elections', activeColor),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildSectionHeader('Active Elections', activeColor),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          widget.tabController.jumpToTab(1);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: activeColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            "See all",
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: activeColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   _buildElectionsList(0),
 
@@ -1107,15 +1144,6 @@ class _HomePageState extends State<HomePage> {
             color: neutralDark,
           ),
         ),
-        // Spacer(),
-        // Text(
-        //   "see all",
-        //   style: GoogleFonts.poppins(
-        //     fontSize: 15,
-        //     fontWeight: FontWeight.w700,
-        //     color: neutralDark,
-        //   ),
-        // ),
       ],
     );
   }
@@ -1202,7 +1230,8 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 16),
 
                       FutureBuilder(
-                        future: supabase.from('elections').count(),
+                        future: resultcount(),
+
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -1511,14 +1540,11 @@ class _HomePageState extends State<HomePage> {
                   if (type != 2) // Not past
                     OutlinedButton.icon(
                       onPressed: () {
-                        Navigator.push(
+                        PersistentNavBarNavigator.pushNewScreen(
                           context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => UserElectionDetails(
-                                  elec: elec,
-                                  profile: profile,
-                                ),
+                          screen: UserElectionDetails(
+                            elec: elec,
+                            profile: profile,
                           ),
                         );
                       },
@@ -1532,34 +1558,38 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                  if (type == 1) // Upcoming
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          // Edit election
-                        },
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: statusColor,
-                          side: BorderSide(color: statusColor),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
+
                   if (type == 2) // Past
                     ElevatedButton.icon(
                       onPressed: () {
-                        PersistentNavBarNavigator.pushNewScreen(
-                          context,
-                          screen: ResultDetailsPage(
-                            election: Election.fromMap(elec),
-                          ),
-                          withNavBar: false,
-                        );
+                        elec['publish']
+                            ? PersistentNavBarNavigator.pushNewScreen(
+                              context,
+                              screen: ResultDetailsPage(
+                                election: Election.fromMap(elec),
+                              ),
+                              withNavBar: false,
+                            )
+                            : ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text("Results not published"),
+                                  ],
+                                ),
+                                backgroundColor: Colors.redAccent,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            );
+                        ;
                       },
                       icon: const Icon(Icons.bar_chart_rounded),
                       label: const Text('Results'),
