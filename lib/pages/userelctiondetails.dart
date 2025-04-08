@@ -333,6 +333,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/pages/user/manifestouploadpage.dart';
+import 'package:univote/pages/user/viewmanifesto.dart';
 import 'package:univote/pages/votingpage.dart';
 import 'package:univote/supabase/candidbase.dart';
 import 'package:flutter/services.dart';
@@ -442,51 +443,77 @@ class CandidateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: AppTheme.defaultRadius,
-        boxShadow: [AppTheme.defaultShadow],
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        leading: Hero(
-          tag: 'candidate-${candidate['id']}',
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor:
-                Colors.primaries[candidate['name'].hashCode %
-                    Colors.primaries.length],
-            child: Text(
-              candidate['name'][0].toString().toUpperCase(),
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+    return GestureDetector(
+      onTap: () {
+        if(candidate['manifesto']!=null){
+        PersistentNavBarNavigator.pushNewScreen(
+          context,
+          withNavBar: false,
+          screen: ViewManifestoPage(url: candidate['manifesto']),
+        );}
+        else{
+          ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        content: Text(
+                          "No Manifesto available",
+                          style: GoogleFonts.outfit(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red.shade800,
+                      ),
+                    );
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.cardColor,
+          borderRadius: AppTheme.defaultRadius,
+          boxShadow: [AppTheme.defaultShadow],
+        ),
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          leading: Hero(
+            tag: 'candidate-${candidate['id']}',
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor:
+                  Colors.primaries[candidate['name'].hashCode %
+                      Colors.primaries.length],
+              child: Text(
+                candidate['name'][0].toString().toUpperCase(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             ),
           ),
-        ),
-        title: Text(
-          candidate['name'],
-          style: GoogleFonts.outfit(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        subtitle: Padding(
-          padding: EdgeInsets.only(top: 4),
-          child: Text(
-            candidate['rollno'],
+          title: Text(
+            candidate['name'],
             style: GoogleFonts.outfit(
-              fontSize: 14,
-              color: AppTheme.textSecondary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
           ),
+          subtitle: Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              candidate['rollno'],
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+          trailing: Icon(Icons.chevron_right, color: AppTheme.primaryColor),
         ),
-        trailing: Icon(Icons.chevron_right, color: AppTheme.primaryColor),
       ),
     );
   }
