@@ -332,6 +332,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:univote/pages/user/manifestouploadpage.dart';
 import 'package:univote/pages/votingpage.dart';
 import 'package:univote/supabase/candidbase.dart';
 import 'package:flutter/services.dart';
@@ -803,9 +804,6 @@ class _UserElectionDetailsState extends State<UserElectionDetails>
     bool isNominationPhase = DateTime.parse(
       elec['start'],
     ).isAfter(DateTime.now());
-    bool isVotingPhase =
-        DateTime.parse(elec['start']).isBefore(DateTime.now()) &&
-        DateTime.parse(elec['end']).isAfter(DateTime.now());
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -846,6 +844,17 @@ class _UserElectionDetailsState extends State<UserElectionDetails>
                         child: Center(
                           child: CustomButton(
                             text: "Submit Nomination",
+                            // onTap: () {
+                            //   PersistentNavBarNavigator.pushNewScreen(
+                            //     context,
+                            //     withNavBar: false,
+                            //     screen: ManifestoUploadPage(
+
+                            //       profile: widget.profile,
+                            //       elec: widget.elec,
+                            //     ),
+                            //   );
+                            // },
                             onTap: showConfirmationDialog,
                             color: AppTheme.accentColor,
                             icon: Icons.person_add,
@@ -991,30 +1000,31 @@ class _UserElectionDetailsState extends State<UserElectionDetails>
               ),
             ),
 
-            // Voting Button (only during voting phase)
-            Positioned(
-              bottom: 100,
-              left: 0,
-              right: 0,
-              child: Align(
-                alignment: Alignment.center,
-                child: CustomButton(
-                  text: "Cast Vote",
-                  color: AppTheme.primaryColor,
-                  icon: Icons.how_to_vote,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    PersistentNavBarNavigator.pushNewScreen(
-                      context,
-                      screen: VotingPage(elec: elec, nominees: nominees),
-                      withNavBar: false,
-                      pageTransitionAnimation:
-                          PageTransitionAnimation.cupertino,
-                    );
-                  },
+            //if Voting Button (only during voting phase)
+            if (!isNominationPhase)
+              Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: CustomButton(
+                    text: "Cast Vote",
+                    color: AppTheme.primaryColor,
+                    icon: Icons.how_to_vote,
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      PersistentNavBarNavigator.pushNewScreen(
+                        context,
+                        screen: VotingPage(elec: elec, nominees: nominees),
+                        withNavBar: false,
+                        pageTransitionAnimation:
+                            PageTransitionAnimation.cupertino,
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

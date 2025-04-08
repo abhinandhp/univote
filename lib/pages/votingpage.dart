@@ -250,8 +250,6 @@
 //   }
 // }
 
-
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -366,7 +364,7 @@ class _VotingPageState extends State<VotingPage> {
 
   @override
   void initState() {
-    candidates = widget.nominees;
+    candidates = List<Map<String, dynamic>>.from(widget.nominees);
     candidates.add({
       'id': -1,
       'created_at': '2025-03-26T18:28:06.153021+00:00',

@@ -7,6 +7,7 @@ import 'package:univote/pages/homepage.dart';
 import 'package:univote/pages/profilepage.dart';
 import 'package:univote/pages/resultspage.dart';
 import 'package:univote/pages/user/activeelection.dart';
+import 'package:univote/pages/user/myelections.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -23,7 +24,8 @@ class _BottomNavState extends State<BottomNav> {
       HomePage(tabController: _tabController),
       Activeelection(),
       ResultPage(),
-      ProfilePage(),
+      MyElections()
+      // ProfilePage(),
     ];
   }
 

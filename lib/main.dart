@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +13,6 @@ void main() async {
       timeout: Duration(seconds: 10),
     ),
   );
-  debugDefaultTargetPlatformOverride = TargetPlatform.android;
   runApp(const MyApp());
 }
 
@@ -26,9 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'UniVote',
       theme: ThemeData(
-        textTheme: GoogleFonts.outfitTextTheme(
-          Theme.of(context).textTheme,
-        )),
-      debugShowCheckedModeBanner: false, home: AuthGate());
+        textTheme: GoogleFonts.outfitTextTheme(Theme.of(context).textTheme),
+      ),
+      debugShowCheckedModeBanner: false,
+      home: AuthGate(),
+    );
   }
 }
