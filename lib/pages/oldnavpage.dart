@@ -23,7 +23,7 @@ class _BottomNavState extends State<BottomNav> {
       HomePage(tabController: _tabController),
       Activeelection(),
       ResultPage(),
-      ProfilePage(),
+      ProfilePage(profile: {},),
     ];
   }
 
