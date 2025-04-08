@@ -1546,13 +1546,24 @@ class _HomePageState extends State<HomePage> {
                   if (type != 2) // Not past
                     OutlinedButton.icon(
                       onPressed: () {
-                        PersistentNavBarNavigator.pushNewScreen(
+                        Navigator.push(
                           context,
-                          screen: UserElectionDetails(
-                            elec: elec,
-                            profile: profile,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => UserElectionDetails(
+                                  elec: elec,
+                                  profile: profile,
+                                ),
                           ),
                         );
+
+                        // PersistentNavBarNavigator.pushNewScreen(
+                        //   context,
+                        //   screen: UserElectionDetails(
+                        //     elec: elec,
+                        //     profile: profile,
+                        //   ),
+                        // );
                       },
                       icon: const Icon(Icons.visibility_outlined),
                       label: const Text('View'),
