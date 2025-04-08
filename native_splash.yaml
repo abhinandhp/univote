@@ -1,0 +1,13 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: true
+
+  color: "#e5e5e4"               # background color
+  image: assets/icon2.png       # required: your splash image
+  branding: assets/icon3.png
+
+  android_12:
+    color: "#e5e5e4"
+    image: assets/icon2.png     # optional but recommended
+    branding: assets/icon3.png
