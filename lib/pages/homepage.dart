@@ -866,6 +866,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:univote/auth/authservice.dart';
 import 'package:univote/models/model.dart';
 import 'package:univote/pages/resultdetails.dart';
+import 'package:univote/pages/user/myelections.dart';
 import 'package:univote/pages/userelctiondetails.dart';
 import 'package:univote/supabase/electionbase.dart';
 import 'package:intl/intl.dart';
@@ -959,7 +960,12 @@ class _HomePageState extends State<HomePage> {
             const Spacer(),
             GestureDetector(
               onTap: () {
-                widget.tabController.jumpToTab(3);
+                PersistentNavBarNavigator.pushNewScreen(
+                  context,
+                  withNavBar: false,
+                  screen: MyElections(),
+                );
+                //widget.tabController.jumpToTab(3);
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -980,7 +986,7 @@ class _HomePageState extends State<HomePage> {
                 child: const CircleAvatar(
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
-                  child: Text('AB'),
+                  child: Text('U'),
                 ),
               ),
             ),
