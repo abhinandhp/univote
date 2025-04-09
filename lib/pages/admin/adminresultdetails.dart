@@ -642,7 +642,7 @@ class _AdminResultDetailsPageState extends State<AdminResultDetailsPage> {
               Center(
   child: ElevatedButton(
     onPressed: ()async {
-     final res=await electionbase.publishElection(widget.election);
+     final res=await electionbase.publishElection(widget.election,candidates[0]['name']);
       if (res==1){
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
