@@ -917,11 +917,22 @@ class _HomePageState extends State<HomePage> {
     return data.length;
   }
 
+  
+  Map<String, dynamic> _userProfile = {};
   @override
   void initState() {
     getUserProfile();
     super.initState();
+    _loadUserData();
   }
+
+  void _loadUserData() async {
+  // Simulated example:
+  final data = await getUserProfile(); // Replace with your real method
+  setState(() {
+    _userProfile = data;
+  });
+}
 
   void logout() async {
     try {
@@ -962,6 +973,7 @@ class _HomePageState extends State<HomePage> {
                 widget.tabController.jumpToTab(3);
               },
               child: Container(
+  
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -977,11 +989,19 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                child: const CircleAvatar(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  child: Text('AB'),
-                ),
+                child: CircleAvatar(
+    backgroundColor: Colors.transparent,
+    foregroundColor: Colors.white,
+    child: Text(
+      _userProfile['username'] != null && _userProfile['username'].isNotEmpty
+    ? _userProfile['username'][0].toUpperCase()
+    : '',
+      style: const TextStyle(
+        fontSize: 20, // adjust as needed
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
               ),
             ),
           ],
