@@ -28,9 +28,11 @@ class ElectionBase {
     await database.delete().eq('id', elec.id!);
   }
 
-  Future <int> publishElection(Election elec) async{
+  Future <int> publishElection(Election elec,String winner) async{
     try {
-      await database.update({'publish':true})
+      await database.update({'publish':true,
+      'winner':winner
+      })
       .eq('id', elec.id!);
       print("successss");
       return 1;
