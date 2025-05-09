@@ -124,7 +124,6 @@ class _AdminResultPageState extends State<AdminResultPage> {
                     ),
                   );
                 }
-
                 if (snapshot.hasData && snapshot.data!.isEmpty) {
                   return Center(
                     child: Text(
