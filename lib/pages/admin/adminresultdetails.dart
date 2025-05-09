@@ -14,7 +14,6 @@ class AdminResultDetailsPage extends StatefulWidget {
   State<AdminResultDetailsPage> createState() => _AdminResultDetailsPageState();
 }
 
-
 class _AdminResultDetailsPageState extends State<AdminResultDetailsPage> {
   final electionbase=ElectionBase();
   final ElectionService _electionService = ElectionService(
